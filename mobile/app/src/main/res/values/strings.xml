@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">JumpRopeCounter</string>
+    <string name="take_photo">Take photo</string>
+    <string name="picture">Picture</string>
+</resources>
