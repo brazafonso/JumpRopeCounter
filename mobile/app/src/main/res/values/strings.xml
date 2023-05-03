@@ -2,4 +2,6 @@
     <string name="app_name">JumpRopeCounter</string>
     <string name="take_photo">Take photo</string>
     <string name="picture">Picture</string>
+    <string name="stop_capturing">Stop Capturing</string>
+    <string name="capture">Capture</string>
 </resources>

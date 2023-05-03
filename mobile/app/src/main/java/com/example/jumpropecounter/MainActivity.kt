@@ -14,11 +14,11 @@ import android.os.HandlerThread
 import android.util.Log
 import android.view.Surface
 import android.view.TextureView
-import android.widget.Button
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.storage.ktx.storage
+import androidx.appcompat.widget.AppCompatToggleButton
+import com.example.jumpropecounter.db.PhotoSender
+import java.nio.file.Path
+import kotlin.io.path.*
 
 
 class MainActivity : AppCompatActivity() {
@@ -27,27 +27,35 @@ class MainActivity : AppCompatActivity() {
     lateinit var capReq: CaptureRequest.Builder
     lateinit var cameraManager: CameraManager
     lateinit var textureView: TextureView
-    lateinit var capture_btn: Button
+    lateinit var capture_btn: AppCompatToggleButton
     lateinit var cameraCaptureSession: CameraCaptureSession
     lateinit var cameraDevice: CameraDevice
-    private val TAG : String =  "MainActivity"
     lateinit var imageReader: ImageReader
-    val storage = Firebase.storage("gs://sa-g4-a91ed.appspot.com")
+    lateinit var photoSender: PhotoSender
+    private val TAG : String =  "MainActivity"
+    lateinit var photo_storage : Path
+
 
     /**
      * Creating app
      */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        photo_storage = Path(application.dataDir.absolutePath + "/files/Pictures")
+        if(!photo_storage.exists())
+            photo_storage.createDirectory()
+
+
         Log.d(TAG,"Loading View")
         setContentView(R.layout.activity_main)
         Log.d(TAG,"Starting Program")
-
         get_permissions()
 
 
         textureView = findViewById(R.id.textView)
         capture_btn = findViewById(R.id.btn_camera)
+        photoSender = PhotoSender(photo_storage)
+        photoSender.start()
 
         cameraManager = getSystemService(Context.CAMERA_SERVICE) as CameraManager
         handlerThread = HandlerThread("videoThread")
@@ -70,14 +78,31 @@ class MainActivity : AppCompatActivity() {
                 return false
             }
         }
+        // Capture button
+        var capturing = false
         capture_btn.apply {
-            setOnClickListener{
-                capReq = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE)
-                capReq.addTarget(imageReader.surface)
-                cameraCaptureSession.capture(capReq.build(),null,null)
+            setOnCheckedChangeListener{ _, isChecked ->
+                if(isChecked){
+                    capturing = true
+                    Thread {
+                        while (capturing) {
+                            Log.d(TAG,"Capturing picture")
+                            capReq = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE)
+                            capReq.addTarget(imageReader.surface)
+                            cameraCaptureSession.capture(capReq.build(), null, null)
+                            // TODO photo rate of 2/s (to tweak)
+                            Thread.sleep(500)
+                        }
+                    }.start()
+                }
+                else{
+                    capturing = false
+                }
             }
         }
-        imageReader = ImageReader.newInstance(1080,1920,ImageFormat.JPEG,1)
+
+
+        imageReader = ImageReader.newInstance(480,640,ImageFormat.JPEG,1)
         imageReader.setOnImageAvailableListener(object : ImageReader.OnImageAvailableListener{
             override fun onImageAvailable(p0: ImageReader?) {
                 // get image
@@ -87,23 +112,25 @@ class MainActivity : AppCompatActivity() {
                 var bytes = ByteArray(buffer.remaining())
                 buffer.get(bytes)
 
-                val tsLong = System.currentTimeMillis() / 1000
+                val tsLong = System.currentTimeMillis()
                 val ts = tsLong.toString()
                 Log.d(TAG, ts)
-                val myRef = storage.reference
-                val im = myRef.child("images/$ts.jpg")
-
-                im.putBytes(bytes)
-
+                val file = Path("$photo_storage/$ts")
+                Log.d(TAG, "Creating file")
+                file.createFile()
+                Log.d(TAG, "File Created")
+                val fileOutputStream = file.outputStream()
+                fileOutputStream.write(bytes)
                 image.close()
+                fileOutputStream.close()
                 Log.d(TAG,"Image Captured")
-                Toast.makeText(this@MainActivity,"image captured",Toast.LENGTH_SHORT).show()
+                //Toast.makeText(this@MainActivity,"image captured",Toast.LENGTH_SHORT).show()
             }
         },handler)
 
-
-        Log.d(TAG,"Finishing Program")
     }
+
+
 
     /**
      * Function to gather necessary permissions for the program
@@ -149,7 +176,7 @@ class MainActivity : AppCompatActivity() {
     fun open_camera(){
         Log.d(TAG,"Opening Camera")
         // openCamera chooses receives a camera and then the callback functions
-        cameraManager.openCamera(cameraManager.cameraIdList[0],object: CameraDevice.StateCallback() {
+        cameraManager.openCamera(cameraManager.cameraIdList[1],object: CameraDevice.StateCallback() {
             override fun onOpened(p0: CameraDevice) {
                 cameraDevice = p0
                 capReq = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
@@ -178,4 +205,9 @@ class MainActivity : AppCompatActivity() {
         },handler)
     }
 
+
+
+    fun sendPhotosDB(){
+
+    }
 }
