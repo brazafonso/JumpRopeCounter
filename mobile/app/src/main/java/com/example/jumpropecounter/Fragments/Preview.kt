@@ -13,6 +13,7 @@ import android.os.HandlerThread
 import android.util.Log
 import android.util.SparseIntArray
 import android.view.*
+import android.widget.ImageButton
 import androidx.appcompat.widget.AppCompatToggleButton
 import androidx.fragment.app.Fragment
 import com.example.jumpropecounter.R
@@ -34,6 +35,8 @@ class Preview: Fragment(R.layout.preview) {
     private lateinit var video_file: File
     private lateinit var previewTextureView :TextureView
     private lateinit var capture_btn:AppCompatToggleButton
+    private lateinit var swap_camera_btn:ImageButton
+    private var current_lens = CameraCharacteristics.LENS_FACING_BACK
     private lateinit var captureSession: CameraCaptureSession
     private lateinit var captureRequestBuilder: CaptureRequest.Builder
     private val mediaRecorder by lazy {
@@ -133,18 +136,31 @@ class Preview: Fragment(R.layout.preview) {
         video_file = createVideoFile()
 
         capture_btn = activity.findViewById(R.id.btn_camera)
+        swap_camera_btn = activity.findViewById(R.id.swap_camera)
         previewTextureView = activity.findViewById(R.id.textView)
         // Capture button
         capture_btn.setOnCheckedChangeListener{ _, isChecked ->
                 if(isChecked){
                     Log.d(TAG,"Capturing video")
+                    disable_swap_camera()
                     startRecordSession()
                 }
                 else{
                     stopRecordSession()
+                    enable_swap_camera()
                 }
             }
+        swap_camera_btn.setOnClickListener { _ ->
+            if(current_lens == CameraCharacteristics.LENS_FACING_BACK)
+                current_lens = CameraCharacteristics.LENS_FACING_FRONT
+            else
+                current_lens = CameraCharacteristics.LENS_FACING_BACK
+            closeCamera()
+            openCamera()
+        }
     }
+
+
 
 
 
@@ -306,6 +322,9 @@ class Preview: Fragment(R.layout.preview) {
         }
     }
 
+    /**
+     * Gets camera id with the given characteristics
+     */
     private fun cameraId(lens: Int) : String {
         var deviceId = listOf<String>()
         try {
@@ -317,14 +336,20 @@ class Preview: Fragment(R.layout.preview) {
         return deviceId[0]
     }
 
+
+
+
     @SuppressLint("MissingPermission")
-    private fun connectCamera() {
-        val deviceId = cameraId(CameraCharacteristics.LENS_FACING_BACK)
+    /**
+     * Connect to camera using lens with given characteristic (such as facing back)
+     */
+    private fun connectCamera(LensCharacteristics: Int) {
+        val deviceId = cameraId(LensCharacteristics)
         Log.d(TAG, "deviceId: $deviceId")
         try {
             cameraManager.openCamera(deviceId, deviceStateCallback, backgroundHandler)
         } catch (e: CameraAccessException) {
-            Log.e(TAG, e.toString())
+            Log.e(TAG, "Exception: $e")
         } catch (e: InterruptedException) {
             Log.e(TAG, "Open camera device interrupted while opened")
         }
@@ -359,8 +384,18 @@ class Preview: Fragment(R.layout.preview) {
     }
 
     private fun openCamera() {
-        connectCamera()
+        connectCamera(current_lens)
     }
 
+
+    private fun enable_swap_camera(){
+        swap_camera_btn.visibility = View.VISIBLE
+        swap_camera_btn.isEnabled = true
+    }
+
+    private fun disable_swap_camera(){
+        swap_camera_btn.visibility = View.INVISIBLE
+        swap_camera_btn.isEnabled = false
+    }
 
 }

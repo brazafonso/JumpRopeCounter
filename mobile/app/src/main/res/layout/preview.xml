@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/preview"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -8,7 +9,7 @@
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="500dp"
-        android:layout_centerVertical="true"/>
+        android:layout_centerVertical="true" />
 
     <androidx.appcompat.widget.AppCompatToggleButton
         android:id="@+id/btn_camera"
@@ -19,5 +20,20 @@
         android:checked="false"
         android:textOff="record"
         android:textOn="strop recording" />
+
+    <ImageButton
+        android:id="@+id/swap_camera"
+        android:layout_width="47dp"
+        android:layout_height="51dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="32dp"
+        android:layout_marginBottom="1dp"
+        android:background="@color/light_grey"
+        android:enabled="true"
+        android:scaleType="fitXY"
+        android:src="@drawable/swap_camera"
+        android:visibility="visible" />
+
 
 </RelativeLayout>
