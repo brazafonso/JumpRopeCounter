@@ -1,33 +1,23 @@
 package com.example.jumpropecounter
 
 
-import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.ImageFormat
-import android.graphics.SurfaceTexture
-import android.hardware.camera2.*
-import android.media.ImageReader
-import android.media.MediaRecorder
 import android.os.Bundle
-import android.os.Handler
-import android.os.HandlerThread
 import android.util.Log
-import android.util.SparseIntArray
-import android.view.Surface
-import android.view.TextureView
+import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.AppCompatToggleButton
 import androidx.fragment.app.Fragment
-import com.example.jumpropecounter.Fragments.Preview
-import com.example.jumpropecounter.db.PhotoSender
-import java.nio.file.Path
-import kotlin.io.path.*
-import kotlin.math.log
+import com.example.jumpropecounter.Camera.Preview
+import com.example.jumpropecounter.DB.Fragments.PhotoSender
+import com.example.jumpropecounter.User.activity.RegisterUserActivity
 
 
 class MainActivity : AppCompatActivity() {
-    lateinit var photoSender: PhotoSender
+    private lateinit var photoSender: PhotoSender
+    private lateinit var register_btn: Button
+    private lateinit var login_btn: Button
     private val TAG : String =  "MainActivity"
     var recording_folder:String = "/app_files/recording"
     var frameRate = 10
@@ -44,18 +34,32 @@ class MainActivity : AppCompatActivity() {
 
         // Get permissions
         get_permissions()
+        //var user = User("username","password")
 
-        getDir("files",Context.MODE_PRIVATE)
-        // Activity to show and capture video
-        val previewFragment = Preview.newInstance(frameRate,application.dataDir.absolutePath + recording_folder)
-        addFragment(previewFragment)
+        val go_capture_btn = findViewById<Button>(R.id.go_capture_btn)
+        register_btn = findViewById(R.id.register_btn)
+        login_btn = findViewById(R.id.login_btn)
+
+        go_capture_btn.setOnClickListener {
+            Log.d(TAG,"Capture mode")
+            getDir("files", Context.MODE_PRIVATE)
+            // Activity to show and capture video
+            val previewFragment = Preview.newInstance(frameRate,application.dataDir.absolutePath + recording_folder)
+            addFragment(previewFragment)
+
+            // Firebase thread
+            photoSender = PhotoSender(application.dataDir.absolutePath + recording_folder, frameRate)
+            photoSender.start()
+        }
+
+        register_btn.setOnClickListener { _ ->
+            val myIntent =  Intent(this,RegisterUserActivity::class.java)
+            startActivity(myIntent)
+        }
 
 
-
-        // Firebase thread
-        photoSender = PhotoSender(application.dataDir.absolutePath + recording_folder, frameRate)
-        photoSender.start()
     }
+
 
 
 
@@ -103,7 +107,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun addFragment(fragment: Fragment?) {
         val fragmentTransaction = supportFragmentManager.beginTransaction()
-        fragmentTransaction.add(R.id.fragmentContainer, fragment!!)
+        fragmentTransaction.addToBackStack(fragment.toString())
+        fragmentTransaction.add(fragment!!,null)
         fragmentTransaction.commit()
     }
 }
