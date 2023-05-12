@@ -15,6 +15,7 @@ import com.example.jumpropecounter.DB.Fragments.PhotoSender
 import com.example.jumpropecounter.User.User
 import com.example.jumpropecounter.User.activity.LoginUserActivity
 import com.google.firebase.auth.FirebaseAuth
+import kotlin.system.exitProcess
 
 class MainActivity : AppCompatActivity() {
     private lateinit var photoSender: PhotoSender
@@ -45,7 +46,11 @@ class MainActivity : AppCompatActivity() {
 
         // Get permissions
         get_permissions()
-        //var user = User("username","password")
+
+
+        // Firebase thread
+        photoSender = PhotoSender(application.dataDir.absolutePath + recording_folder, frameRate)
+        photoSender.start()
 
         go_capture_btn = findViewById(R.id.go_capture_btn)
         login_btn = findViewById(R.id.login_btn)
@@ -73,9 +78,6 @@ class MainActivity : AppCompatActivity() {
             val previewFragment = Preview.newInstance(frameRate,getSharedPreferences("prefs",MODE_PRIVATE).getString("app_path",null) + recording_folder)
             addFragment(previewFragment)
 
-            // Firebase thread
-            photoSender = PhotoSender(application.dataDir.absolutePath + recording_folder, frameRate)
-            photoSender.start()
         }
 
 
@@ -185,7 +187,7 @@ class MainActivity : AppCompatActivity() {
     private fun addFragment(fragment: Fragment?) {
         val fragmentTransaction = supportFragmentManager.beginTransaction()
         fragmentTransaction.addToBackStack(fragment.toString())
-        fragmentTransaction.add(fragment!!,null)
+        fragmentTransaction.replace(R.id.fragmentPreviewContainer,fragment!!)
         fragmentTransaction.commit()
     }
 }

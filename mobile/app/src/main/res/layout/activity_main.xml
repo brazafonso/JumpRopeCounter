@@ -6,6 +6,8 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
+
+
     <Button
         android:id="@+id/go_capture_btn"
         android:layout_width="wrap_content"
@@ -37,6 +39,16 @@
         android:layout_marginBottom="164dp"
         android:text="logout"
         android:visibility="invisible"/>
+
+    <FrameLayout
+        android:id="@+id/fragmentPreviewContainer"
+        android:name="com.example.jumpropecounter.Camera.Preview"
+        android:layout_width="341dp"
+        android:layout_height="293dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="34dp"
+        android:layout_marginTop="4dp" />
 
 
 </RelativeLayout>
