@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_color">
+
+    <TextView
+        android:id="@+id/welcomeline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/open_sans_bold"
+        android:text="Hello User!"
+        android:textAlignment="textStart"
+        android:textColor="@color/text"
+        android:textSize="24sp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="25dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+        <!--tools:layout_editor_absoluteX="16dp"
+        tools:layout_editor_absoluteY="24dp"-->
+
+    <ImageView
+        android:id="@+id/profileimage"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:src="@drawable/coach"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="16dp"
+        app:layout_constraintStart_toEndOf="@+id/welcomeline"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+    
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="16dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/welcomeline">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/welcomeline">
+
+            <TextView
+                android:id="@+id/njumpstext"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/open_sans_bold"
+                android:text="Number of Jumps"
+                android:textAlignment="textStart"
+                android:textColor="@color/text"
+                android:textSize="20sp" />
+
+            <TextView
+                android:id="@+id/njumps"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/open_sans_bold"
+                android:text="100"
+                android:layout_marginLeft="10dp"
+                android:textAlignment="textStart"
+                android:textColor="@color/text"
+                android:textSize="20sp" />
+
+        </LinearLayout>
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
