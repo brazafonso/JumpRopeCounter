@@ -2,6 +2,7 @@
 <resources>
     <color name="text">#e5fffd</color>
     <color name="background_color">#0b0c12</color>
+    <color name="light_background_color">#1d2025</color>
     <color name="primary_button">#b369fc</color>
     <color name="secondary_button">#2472a3</color>
     <color name="accent">#db5151</color>
