@@ -6,18 +6,22 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.example.jumpropecounter.Camera.Preview
 import com.example.jumpropecounter.DB.Fragments.PhotoSender
-import com.example.jumpropecounter.User.activity.RegisterUserActivity
-
+import com.example.jumpropecounter.User.User
+import com.example.jumpropecounter.User.activity.LoginUserActivity
+import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : AppCompatActivity() {
     private lateinit var photoSender: PhotoSender
-    private lateinit var register_btn: Button
     private lateinit var login_btn: Button
+    private lateinit var logout_btn: Button
+    private lateinit var go_capture_btn: Button
+    private var user: User? = null
     private val TAG : String =  "MainActivity"
     var recording_folder:String = "/app_files/recording"
     var frameRate = 10
@@ -28,23 +32,45 @@ class MainActivity : AppCompatActivity() {
      */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         Log.d(TAG,"Loading View")
         setContentView(R.layout.activity_main)
         Log.d(TAG,"Starting Program")
+
+        // Create shared preferences
+        val sharedPreferences = getSharedPreferences("prefs", MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        editor.putString("app_path", application.dataDir.absolutePath)
+        editor.commit()
 
         // Get permissions
         get_permissions()
         //var user = User("username","password")
 
-        val go_capture_btn = findViewById<Button>(R.id.go_capture_btn)
-        register_btn = findViewById(R.id.register_btn)
+        go_capture_btn = findViewById(R.id.go_capture_btn)
         login_btn = findViewById(R.id.login_btn)
+        logout_btn = findViewById(R.id.logout_btn)
+
+        // Check logged info (using firebase)
+        val u = FirebaseAuth.getInstance().currentUser
+        if(u!=null){
+            Log.d(TAG,"Logged User")
+            user = User(u.displayName!!)
+            enable_login(false)
+            enable_logout(true)
+
+        }else{
+            Log.d(TAG,"User not logged")
+            enable_logout(false)
+            enable_login(true)
+        }
+
 
         go_capture_btn.setOnClickListener {
             Log.d(TAG,"Capture mode")
             getDir("files", Context.MODE_PRIVATE)
             // Activity to show and capture video
-            val previewFragment = Preview.newInstance(frameRate,application.dataDir.absolutePath + recording_folder)
+            val previewFragment = Preview.newInstance(frameRate,getSharedPreferences("prefs",MODE_PRIVATE).getString("app_path",null) + recording_folder)
             addFragment(previewFragment)
 
             // Firebase thread
@@ -52,14 +78,42 @@ class MainActivity : AppCompatActivity() {
             photoSender.start()
         }
 
-        register_btn.setOnClickListener { _ ->
-            val myIntent =  Intent(this,RegisterUserActivity::class.java)
+
+        login_btn.setOnClickListener { _ ->
+            Log.d(TAG,"Login Button")
+            val myIntent =  Intent(this,LoginUserActivity::class.java)
             startActivity(myIntent)
         }
 
+        logout_btn.setOnClickListener { _ ->
+            Log.d(TAG,"Logout button")
+            user?.sign_out()
+            user = null
+            enable_logout(false)
+            enable_login(true)
+        }
 
     }
 
+
+
+    override fun onRestart() {
+        super.onRestart()
+        Log.d(TAG,"Restarting")
+
+        val u = FirebaseAuth.getInstance().currentUser
+        if(u!=null){
+            Log.d(TAG,"Logged User")
+            user = User(u.displayName!!)
+            enable_login(false)
+            enable_logout(true)
+
+        }else{
+            Log.d(TAG,"User not logged")
+            enable_logout(false)
+            enable_login(true)
+        }
+    }
 
 
 
@@ -104,7 +158,30 @@ class MainActivity : AppCompatActivity() {
 
 
 
+    /**
+     * Changes the status of the login button
+     */
+    fun enable_login(enable:Boolean){
+        if(enable)
+            login_btn.visibility = View.VISIBLE
+        else
+            login_btn.visibility = View.INVISIBLE
+    }
 
+    /**
+     * Changes the status of the logout button
+     */
+    fun enable_logout(enable:Boolean){
+        if(enable)
+            logout_btn.visibility = View.VISIBLE
+        else
+            logout_btn.visibility = View.INVISIBLE
+    }
+
+
+    /**
+     * Adds a new fragment to the stack and starts it
+     */
     private fun addFragment(fragment: Fragment?) {
         val fragmentTransaction = supportFragmentManager.beginTransaction()
         fragmentTransaction.addToBackStack(fragment.toString())

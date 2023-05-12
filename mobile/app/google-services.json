@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "1037707547123",
+    "firebase_url": "https://sa-g4-a91ed-default-rtdb.europe-west1.firebasedatabase.app",
     "project_id": "sa-g4-a91ed",
     "storage_bucket": "sa-g4-a91ed.appspot.com"
   },
@@ -14,7 +15,7 @@
       },
       "oauth_client": [
         {
-          "client_id": "1037707547123-j6g315bfcqblmc7kugdgpinuct443e23.apps.googleusercontent.com",
+          "client_id": "1037707547123-t038ng8i4g27h8n29mqjd0obpo6h0kaa.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
