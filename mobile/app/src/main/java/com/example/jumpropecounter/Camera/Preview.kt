@@ -114,6 +114,7 @@ class Preview: Fragment(R.layout.preview) {
     }
 
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (arguments != null) {
@@ -131,7 +132,6 @@ class Preview: Fragment(R.layout.preview) {
         Log.d(TAG,"Starting preview fragment")
 
         activity = requireActivity()
-        activity.setContentView(R.layout.preview)
         //Creating file to store video
         if(!video_storage.exists())
             video_storage.createDirectories()
@@ -161,7 +161,6 @@ class Preview: Fragment(R.layout.preview) {
             openCamera()
         }
     }
-
 
 
 
