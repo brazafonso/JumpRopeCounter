@@ -73,7 +73,7 @@ class MainActivity : AppCompatActivity() {
 
         go_capture_btn.setOnClickListener {
             Log.d(TAG,"Capture mode")
-            getDir("files", Context.MODE_PRIVATE)
+            getDir("files", MODE_PRIVATE)
             // Activity to show and capture video
             val previewFragment = Preview.newInstance(frameRate,getSharedPreferences("prefs",MODE_PRIVATE).getString("app_path",null) + recording_folder)
             addFragment(previewFragment)
