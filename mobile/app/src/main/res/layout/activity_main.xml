@@ -7,7 +7,6 @@
     tools:context=".MainActivity">
 
 
-
     <Button
         android:id="@+id/go_capture_btn"
         android:layout_width="wrap_content"

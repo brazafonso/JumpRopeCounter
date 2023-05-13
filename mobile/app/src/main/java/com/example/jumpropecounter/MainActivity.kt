@@ -15,8 +15,10 @@ import com.example.jumpropecounter.DB.Fragments.PhotoSender
 import com.example.jumpropecounter.User.User
 import com.example.jumpropecounter.User.activity.LoginUserActivity
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import kotlin.system.exitProcess
 
+const val EXTRA_USER = "user"
 class MainActivity : AppCompatActivity() {
     private lateinit var photoSender: PhotoSender
     private lateinit var login_btn: Button
@@ -48,9 +50,10 @@ class MainActivity : AppCompatActivity() {
         get_permissions()
 
 
-        // Firebase thread
+        /*// Firebase thread
         photoSender = PhotoSender(application.dataDir.absolutePath + recording_folder, frameRate)
         photoSender.start()
+        */
 
         go_capture_btn = findViewById(R.id.go_capture_btn)
         login_btn = findViewById(R.id.login_btn)
@@ -60,10 +63,8 @@ class MainActivity : AppCompatActivity() {
         val u = FirebaseAuth.getInstance().currentUser
         if(u!=null){
             Log.d(TAG,"Logged User")
-            user = User(u.displayName!!)
-            enable_login(false)
-            enable_logout(true)
-
+            get_user(u)
+            go_home_activity()
         }else{
             Log.d(TAG,"User not logged")
             enable_logout(false)
@@ -106,10 +107,8 @@ class MainActivity : AppCompatActivity() {
         val u = FirebaseAuth.getInstance().currentUser
         if(u!=null){
             Log.d(TAG,"Logged User")
-            user = User(u.displayName!!)
-            enable_login(false)
-            enable_logout(true)
-
+            get_user(u)
+            go_home_activity()
         }else{
             Log.d(TAG,"User not logged")
             enable_logout(false)
@@ -159,6 +158,16 @@ class MainActivity : AppCompatActivity() {
     }
 
 
+    /**
+     * Gets and updates firebase user
+     */
+    fun get_user(u:FirebaseUser){
+        user = User(u.uid,u.displayName!!,u.email)
+        user!!.get_user_data()
+        Log.d(TAG, "User ${user!!.username}")
+    }
+
+
 
     /**
      * Changes the status of the login button
@@ -178,6 +187,16 @@ class MainActivity : AppCompatActivity() {
             logout_btn.visibility = View.VISIBLE
         else
             logout_btn.visibility = View.INVISIBLE
+    }
+
+
+    /**
+     * Goes to home activity
+     */
+    fun go_home_activity(){
+        val intent =  Intent(this,Home::class.java)
+        intent.putExtra(EXTRA_USER,user)
+        startActivity(intent)
     }
 
 
