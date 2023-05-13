@@ -3,7 +3,8 @@
 
     <item android:title="Home"
         android:id="@+id/home"
-        android:icon="@drawable/baseline_home_24" />
+        android:icon="@drawable/baseline_home_24"
+        android:checked="true"/>
     <item android:title="Exercise"
         android:id="@+id/exercise"
         android:icon="@drawable/baseline_directions_run_24"/>

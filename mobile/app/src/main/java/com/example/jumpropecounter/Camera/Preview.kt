@@ -82,7 +82,7 @@ class Preview: Fragment(R.layout.preview) {
     private lateinit var backgroundThread: HandlerThread
     private lateinit var backgroundHandler: Handler
 
-    //TODO: permitir trocar entre as diferentes camaras disponiveis (pelo menos frente e tras)
+
     companion object {
         fun newInstance(frameRate:Int,video_storage:String):Preview{
             val fragment = Preview()

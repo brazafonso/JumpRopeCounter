@@ -1,7 +1,6 @@
 package com.example.jumpropecounter
 
 
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -12,11 +11,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.example.jumpropecounter.Camera.Preview
 import com.example.jumpropecounter.DB.Fragments.PhotoSender
+import com.example.jumpropecounter.Hub.Hub
 import com.example.jumpropecounter.User.User
 import com.example.jumpropecounter.User.activity.LoginUserActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import kotlin.system.exitProcess
 
 const val EXTRA_USER = "user"
 class MainActivity : AppCompatActivity() {
@@ -64,7 +63,7 @@ class MainActivity : AppCompatActivity() {
         if(u!=null){
             Log.d(TAG,"Logged User")
             get_user(u)
-            go_home_activity()
+            go_hub_activity()
         }else{
             Log.d(TAG,"User not logged")
             enable_logout(false)
@@ -108,7 +107,7 @@ class MainActivity : AppCompatActivity() {
         if(u!=null){
             Log.d(TAG,"Logged User")
             get_user(u)
-            go_home_activity()
+            go_hub_activity()
         }else{
             Log.d(TAG,"User not logged")
             enable_logout(false)
@@ -193,8 +192,8 @@ class MainActivity : AppCompatActivity() {
     /**
      * Goes to home activity
      */
-    fun go_home_activity(){
-        val intent =  Intent(this,Home::class.java)
+    fun go_hub_activity(){
+        val intent =  Intent(this, Hub::class.java)
         intent.putExtra(EXTRA_USER,user)
         startActivity(intent)
     }
