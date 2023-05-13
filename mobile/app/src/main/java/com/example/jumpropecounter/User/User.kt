@@ -20,6 +20,7 @@ class User (user_id:String,username:String?,email:String?):Parcelable{
     var email = email ?: user_id
     var total_jumps = 0
     var permission_level = 0
+    var created = System.currentTimeMillis()
 
 
     /**
@@ -98,6 +99,7 @@ class User (user_id:String,username:String?,email:String?):Parcelable{
         email = map["email"].toString()
         total_jumps = map["total_jumps"].toString().toInt()
         permission_level = map["permission_level"].toString().toInt()
+        created = map["permission_level"].toString().toLong()
     }
 
     fun to_map():Map<String, Any?>{
@@ -105,7 +107,8 @@ class User (user_id:String,username:String?,email:String?):Parcelable{
             "username" to username,
             "email" to email,
             "total_jumps" to total_jumps,
-            "permission_level" to permission_level
+            "permission_level" to permission_level,
+            "created" to created
         )
     }
 
@@ -123,6 +126,7 @@ class User (user_id:String,username:String?,email:String?):Parcelable{
         parcel.writeString(username)
         parcel.writeString(email)
         parcel.writeInt(total_jumps)
+        parcel.writeLong(created)
     }
 
     override fun describeContents(): Int {
