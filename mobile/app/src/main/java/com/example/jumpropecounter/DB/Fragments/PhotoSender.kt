@@ -103,6 +103,9 @@ class PhotoSender(recording_folder: String,frameRate: Int) : Thread() {
             }
             // Creates a picture for each frame
             while (frame < n_frames!!) {
+                // TODO: Somewhere here, put the bitmap in a Frame object and send it to the database
+                //  Use the ConcurrentFifo class to enqueue the frames
+
                 val frameBitMap = retriever.getFrameAtIndex(frame)
                 if (frameBitMap != null) {
                     val newFile = Path("$frames_folder/${file.nameWithoutExtension}/" +"${file.nameWithoutExtension}_$frame.jpeg")

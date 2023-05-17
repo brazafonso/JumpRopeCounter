@@ -20,7 +20,7 @@
         android:layout_centerHorizontal="true"
         android:checked="false"
         android:textOff="record"
-        android:textOn="strop recording"
+        android:textOn="stop recording"
         tools:layout_editor_absoluteX="178dp"
         tools:layout_editor_absoluteY="573dp" />
 

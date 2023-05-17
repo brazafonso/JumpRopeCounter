@@ -48,6 +48,15 @@ class MainActivity : AppCompatActivity() {
         // Get permissions
         get_permissions()
 
+        // TODO: Shared FIFO between Preview and JumpCounter
+        // ConcurrentFIFO: FIFO with concurrent access
+        // Holds frames to be processed
+        // Also, there are special frames/flags to indicate start and end of recording
+        //
+        // val concurrentFIFO = ConcurrentFifo()
+
+        // JumpCounter thread: will analyse frames and display jump count
+
 
         /*// Firebase thread
         photoSender = PhotoSender(application.dataDir.absolutePath + recording_folder, frameRate)
