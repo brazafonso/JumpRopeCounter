@@ -19,19 +19,19 @@ class Frame (val frame : Bitmap, val seqNum : Int, val isStart : Boolean = false
     private val START : Boolean = isStart
     private val END : Boolean = isEnd
 
-    fun getFrame() : Bitmap {
+    fun get_frame() : Bitmap {
         return _frame
     }
 
-    fun getSeqNum() : Int {
+    fun get_seq_num() : Int {
         return _seqNum
     }
 
-    fun isStart() : Boolean {
+    fun is_start() : Boolean {
         return START
     }
 
-    fun isEnd() : Boolean {
+    fun is_end() : Boolean {
         return END
     }
 }

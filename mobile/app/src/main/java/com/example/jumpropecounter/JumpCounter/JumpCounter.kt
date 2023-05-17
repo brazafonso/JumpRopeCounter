@@ -54,7 +54,7 @@ class JumpCounter (val concurrentFIFO: ConcurrentFifo<Frame>) : Thread() {
 
         if (!_concurrentFIFO.isEmpty()) {
             val frame = _concurrentFIFO.dequeue()
-            if (frame.isStart())
+            if (frame.is_start())
             {
                 jumpCount = 0
                 jumpList.clear()
@@ -73,7 +73,7 @@ class JumpCounter (val concurrentFIFO: ConcurrentFifo<Frame>) : Thread() {
             jumpList.add(jumping)
 
             // Check if we reached the end of the video
-            if (frame.isEnd())
+            if (frame.is_end())
             {
                 Log.d(TAG, "Total jump count: $jumpCount")
             }
@@ -83,7 +83,7 @@ class JumpCounter (val concurrentFIFO: ConcurrentFifo<Frame>) : Thread() {
     private fun getPrediction(module: Module, frame : Frame) : Boolean
     {
         val inputTensor : Tensor = TensorImageUtils.bitmapToFloat32Tensor(
-            frame.getFrame(),
+            frame.get_frame(),
             TensorImageUtils.TORCHVISION_NORM_MEAN_RGB,
             TensorImageUtils.TORCHVISION_NORM_STD_RGB
         )
