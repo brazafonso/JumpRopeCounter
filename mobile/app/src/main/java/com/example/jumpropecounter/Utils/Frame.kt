@@ -12,14 +12,14 @@ import android.graphics.Bitmap
  *
  * The start and end frame have to be indicated!
  */
-class Frame (val frame : Bitmap, val seqNum : Int, val isStart : Boolean = false, val isEnd : Boolean = false) {
-    private val _frame : Bitmap = frame
+class Frame(val frame: Bitmap?, val seqNum: Int, val isStart: Boolean = false, val isEnd: Boolean = false) {
+    private val _frame : Bitmap? = frame
     private val _seqNum : Int = seqNum
 
     private val START : Boolean = isStart
     private val END : Boolean = isEnd
 
-    fun get_frame() : Bitmap {
+    fun get_frame() : Bitmap? {
         return _frame
     }
 

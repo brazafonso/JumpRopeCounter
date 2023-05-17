@@ -24,6 +24,9 @@ class JumpCounter (val concurrentFIFO: ConcurrentFifo<Frame>) : Thread() {
     // Shared FIFO between Preview and JumpCounter
     private val _concurrentFIFO : ConcurrentFifo<Frame> = concurrentFIFO
 
+    // Current jump count
+    private var _jumpCount : Int = 0
+
 
     @SuppressLint("RestrictedApi")
     override fun run()
@@ -33,11 +36,7 @@ class JumpCounter (val concurrentFIFO: ConcurrentFifo<Frame>) : Thread() {
             val module : Module = Module.load(assetFilePath(getApplicationContext(), "model.pt"))
 
             // Start jump counter
-            while (true)
-            {
-                jumpCounter(module)
-            }
-
+            jumpCounter(module)
         }
         catch (e: Exception)
         {
@@ -47,35 +46,40 @@ class JumpCounter (val concurrentFIFO: ConcurrentFifo<Frame>) : Thread() {
 
     private fun jumpCounter(module : Module)
     {
-        var jumpCount = 0
+        while (true)
+        {
+            // List of jump/non-jump frames. True = jump, False = non-jump
+            val jumpList = mutableListOf<Boolean>()
 
-        // List of jump/non-jump frames. True = jump, False = non-jump
-        val jumpList = mutableListOf<Boolean>()
-
-        if (!_concurrentFIFO.isEmpty()) {
-            val frame = _concurrentFIFO.dequeue()
-            if (frame.is_start())
-            {
-                jumpCount = 0
-                jumpList.clear()
-            }
-
-            val jumping : Boolean = getPrediction(module, frame)
-
-            // Check if we add a jump to the counter
-            if(jumping)
-            {
-                if (jumpList.isEmpty() or !jumpList.last())
+            if (!_concurrentFIFO.isEmpty()) {
+                val frame = _concurrentFIFO.dequeue()
+                if (frame.is_start())
                 {
-                    jumpCount++
+                    this._jumpCount = 0
+                    jumpList.clear()
                 }
-            }
-            jumpList.add(jumping)
 
-            // Check if we reached the end of the video
-            if (frame.is_end())
-            {
-                Log.d(TAG, "Total jump count: $jumpCount")
+                // Check if frame is null
+                if(frame.get_frame() != null)
+                {
+                    val jumping : Boolean = getPrediction(module, frame)
+
+                    // Check if we add a jump to the counter
+                    if(jumping)
+                    {
+                        if (jumpList.isEmpty() or !jumpList.last())
+                        {
+                            this._jumpCount++
+                        }
+                    }
+                    jumpList.add(jumping)
+                }
+
+                // Check if we reached the end of the video
+                if (frame.is_end())
+                {
+                    Log.d(TAG, "Total jump count: ${this._jumpCount}")
+                }
             }
         }
     }
