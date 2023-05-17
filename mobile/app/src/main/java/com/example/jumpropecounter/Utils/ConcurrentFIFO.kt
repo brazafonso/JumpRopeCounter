@@ -1,9 +1,10 @@
 package com.example.jumpropecounter.Utils
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.BlockingQueue
+import java.util.concurrent.LinkedBlockingQueue
 
-class ConcurrentFifo<T>(private val capacity: Int) {
-    private val queue: BlockingQueue<T> = ArrayBlockingQueue(capacity)
+class ConcurrentFifo<T>() {
+    private val queue: BlockingQueue<T> = LinkedBlockingQueue()
 
     fun enqueue(item: T) {
         queue.put(item)
