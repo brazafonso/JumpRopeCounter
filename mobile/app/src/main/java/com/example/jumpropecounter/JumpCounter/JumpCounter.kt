@@ -1,6 +1,8 @@
 package com.example.jumpropecounter.JumpCounter
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import com.example.jumpropecounter.Utils.ConcurrentFifo
 import com.example.jumpropecounter.Utils.Frame
 import android.util.Log
@@ -11,6 +13,7 @@ import org.pytorch.Tensor
 import org.pytorch.torchvision.TensorImageUtils
 import java.io.File
 import java.io.FileOutputStream
+import java.io.IOException
 import java.io.InputStream
 
 class JumpCounter (val concurrentFIFO: ConcurrentFifo<Frame>) : Thread() {
@@ -28,29 +31,57 @@ class JumpCounter (val concurrentFIFO: ConcurrentFifo<Frame>) : Thread() {
     private var _jumpCount : Int = 0
 
 
+    fun loadBitmapFromAssets(context: Context, fileName: String): Bitmap? {
+        return try {
+            val inputStream = context.assets.open(fileName)
+            BitmapFactory.decodeStream(inputStream)
+        } catch (e: IOException) {
+            e.printStackTrace()
+            null
+        }
+    }
+
     @SuppressLint("RestrictedApi")
     override fun run()
     {
+        Log.d(TAG, "Starting jump counter")
+
+        // TEST ONLY: Load images from assets
+        val img_test_jumping : Bitmap? = loadBitmapFromAssets(getApplicationContext(), "test_jumping.jpg")
+        val img_test_not_jumping : Bitmap? = loadBitmapFromAssets(getApplicationContext(), "test_not_jumping.jpg")
+
+        Log.d(TAG, "Adding test images to FIFO. Is empty: ${this._concurrentFIFO.isEmpty()}")
+        this._concurrentFIFO.enqueue(Frame(img_test_jumping, 0, isStart = true))
+        this._concurrentFIFO.enqueue(Frame(img_test_not_jumping, 1, isEnd = true))
+        Log.d(TAG, "Added test images to FIFO. Is empty: ${this._concurrentFIFO.isEmpty()}")
+
+        var module : Module? = null
         try {
             // Load ML model
-            val module : Module = Module.load(assetFilePath(getApplicationContext(), "model.pt"))
-
-            // Start jump counter
-            jumpCounter(module)
+            val afp = assetFilePath(getApplicationContext(), "model.ptl")
+            module = Module.load(afp)
         }
         catch (e: Exception)
         {
             Log.d(TAG, "Failed to load ML model")
+            Log.d(TAG, e.toString())
+        }
+
+        // Start jump counter
+        if (module != null)
+        {
+            Log.d(TAG, "Starting jump counter")
+            jumpCounter(module)
         }
     }
 
     private fun jumpCounter(module : Module)
     {
+        // List of jump/non-jump frames. True = jump, False = non-jump
+        val jumpList = mutableListOf<Boolean>()
+
         while (true)
         {
-            // List of jump/non-jump frames. True = jump, False = non-jump
-            val jumpList = mutableListOf<Boolean>()
-
             if (!_concurrentFIFO.isEmpty()) {
                 val frame = _concurrentFIFO.dequeue()
                 if (frame.is_start())
@@ -67,7 +98,7 @@ class JumpCounter (val concurrentFIFO: ConcurrentFifo<Frame>) : Thread() {
                     // Check if we add a jump to the counter
                     if(jumping)
                     {
-                        if (jumpList.isEmpty() or !jumpList.last())
+                        if (jumpList.isEmpty() or (!jumpList.isEmpty() && !jumpList.last()))
                         {
                             this._jumpCount++
                         }
@@ -79,6 +110,7 @@ class JumpCounter (val concurrentFIFO: ConcurrentFifo<Frame>) : Thread() {
                 if (frame.is_end())
                 {
                     Log.d(TAG, "Total jump count: ${this._jumpCount}")
+                    Log.d(TAG, "Jump list: $jumpList")
                 }
             }
         }
