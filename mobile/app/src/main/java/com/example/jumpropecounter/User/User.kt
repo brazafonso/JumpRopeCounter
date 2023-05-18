@@ -1,11 +1,15 @@
 package com.example.jumpropecounter.User
 
+import android.content.Context
 import android.os.Parcel
 import android.os.Parcelable
 import android.util.Log
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import kotlin.coroutines.coroutineContext
 
 const val DB_USER_PATH = "users"
 

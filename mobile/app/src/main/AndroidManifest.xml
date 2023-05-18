@@ -36,6 +36,14 @@
             android:name=".Hub.Hub"
             android:exported="false"
             android:screenOrientation="portrait"/>
+        <activity
+            android:name=".Exercise.JumpRope"
+            android:exported="false"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".Camera.teste"
+            android:exported="false"
+            android:screenOrientation="portrait"/>
     </application>
 
 </manifest>

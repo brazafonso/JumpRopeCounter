@@ -1,17 +1,28 @@
 package com.example.jumpropecounter.Hub.Fragments
 
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import androidx.fragment.app.Fragment
+import com.example.jumpropecounter.Exercise.JumpRope
 import com.example.jumpropecounter.R
 
 
 class Exercise : Fragment() {
+    val TAG = "Exercise Fragment"
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+        val jumpRopeButton = requireActivity().findViewById<Button>(R.id.JumpRopeButton)
+        jumpRopeButton.setOnClickListener {
+            Log.d(TAG,"Going to Jump Rope activity")
+            val intent = Intent(activity,JumpRope::class.java)
+            startActivity(intent)
+        }
     }
 
     override fun onCreateView(

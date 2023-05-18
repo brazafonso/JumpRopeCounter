@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/TextViewJumpRope"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="76dp"
+        android:layout_marginTop="33dp"
+        android:text="Jump Rope Counter"
+        android:textSize="30sp"
+        tools:layout_editor_absoluteX="72dp"
+        tools:layout_editor_absoluteY="47dp" />
+
+
+    <TextView
+        android:id="@+id/TextViewJumpRopeCounterDesc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="9dp"
+        android:layout_marginTop="139dp"
+        android:text="Number of Jumps:"
+        android:textSize="25sp" />
+
+    <TextView
+        android:id="@+id/TextViewJumpRopeCounter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="233dp"
+        android:layout_marginTop="139dp"
+        android:text="0"
+        android:textSize="25sp" />
+
+    <FrameLayout
+        android:id="@+id/JumpRopeCameraPreview"
+        android:layout_width="338dp"
+        android:layout_height="542dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="37dp"
+        android:layout_marginTop="300dp" />
+</RelativeLayout>

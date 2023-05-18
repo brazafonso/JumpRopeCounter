@@ -41,6 +41,7 @@ android {
                             'src/main/res/layouts/main',
                             'src/main/res/layouts/hub',
                             'src/main/res/layouts/util',
+                            'src/main/res/layouts/exercises',
                             'src/main/res/layouts',
                             'src/main/res'
                     ]

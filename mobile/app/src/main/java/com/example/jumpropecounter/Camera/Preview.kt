@@ -7,59 +7,50 @@ import android.graphics.BitmapFactory
 import android.graphics.ImageFormat
 import android.graphics.SurfaceTexture
 import android.hardware.camera2.*
-import android.media.ImageReader
-import android.media.MediaRecorder
+import android.media.*
 import android.os.Bundle
 import android.os.Handler
 import android.os.HandlerThread
+import android.os.ParcelFileDescriptor
 import android.util.Log
 import android.util.SparseIntArray
 import android.view.*
 import android.widget.ImageButton
 import androidx.appcompat.widget.AppCompatToggleButton
 import androidx.fragment.app.Fragment
+import com.example.jumpropecounter.JumpCounter.JumpCounter
 import com.example.jumpropecounter.R
 import com.example.jumpropecounter.Utils.ConcurrentFifo
 import com.example.jumpropecounter.Utils.Frame
 import java.io.File
+import java.io.FileOutputStream
 import java.nio.file.Path
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.ArrayList
 import kotlin.io.path.*
 
 class Preview: Fragment(R.layout.preview) {
 
     private lateinit var activity:Activity
     private lateinit var previewTextureView :TextureView
+    private lateinit var imageReader: ImageReader
     private lateinit var swap_camera_btn:ImageButton
     private lateinit var capture_btn:AppCompatToggleButton
     private lateinit var captureSession: CameraCaptureSession
     private lateinit var captureRequestBuilder: CaptureRequest.Builder
     private lateinit var cameraDevice: CameraDevice
+    private lateinit var counter: Thread
+
 
     companion object {
-        fun newInstance(frameRate:Int,video_storage:String):Preview{
+        fun newInstance(frameRate:Int,video_storage:String,mode:Int):Preview{
             val fragment = Preview()
             val args = Bundle()
             args.putInt("FRAMERATE",frameRate)
             args.putString("video_storage",video_storage)
+            args.putInt("mode",mode)
             fragment.arguments = args
             return fragment
-        }
-        private val SENSOR_DEFAULT_ORINTATION_DEGREES = 90
-        private val SENSOR_INVERSE_ORINTATION_DEGREES = 270
-        private val DEFAULT_ORIENTATION = SparseIntArray().apply {
-            append(Surface.ROTATION_0, 90)
-            append(Surface.ROTATION_90, 0)
-            append(Surface.ROTATION_180, 270)
-            append(Surface.ROTATION_270, 180)
-        }
-        private val INVERSE_ORIENTATION = SparseIntArray().apply {
-            append(Surface.ROTATION_0, 270)
-            append(Surface.ROTATION_90, 180)
-            append(Surface.ROTATION_180, 90)
-            append(Surface.ROTATION_270, 0)
         }
 
         private val TAG = "preview"
@@ -68,32 +59,19 @@ class Preview: Fragment(R.layout.preview) {
         private var FRAME_WIDTH = 320
         private var FRAME_HEIGTH = 240
         private var FRAMERATE = 20
+        private var MODE = 0 // opertaion mode (normal or dev)
         private var N_SEQ = 0
+        private var recording = false
         private var framesFifo =  ConcurrentFifo<Frame>() // stack to store frames
+        private lateinit var backgroundThread: HandlerThread
+        private lateinit var backgroundHandler: Handler
+        
+
+        // For saving video or frames
         private lateinit var video_storage: Path
         private lateinit var video_file: File
-        private var current_lens = CameraCharacteristics.LENS_FACING_BACK
-        private val mediaRecorder by lazy {
-            MediaRecorder()
-        }
 
-        /**
-         * ImageReader's callback
-         */
-        object  FrameCallback : ImageReader.OnImageAvailableListener{
-            override fun onImageAvailable(reader: ImageReader?) {
-                if(reader!=null){
-                    val image = reader.acquireNextImage()
-                    val buffer = image.planes[0].buffer
-                    image.close()
-                    val bytes = ByteArray(buffer.remaining())
-                    buffer.get(bytes)
-                    val frame = Frame(BitmapFactory.decodeByteArray(bytes,0,bytes.size), N_SEQ)
-                    framesFifo.enqueue(frame)
-                    N_SEQ++
-                }
-            }
-        }
+        private var current_lens = CameraCharacteristics.LENS_FACING_BACK
 
     }
 
@@ -113,7 +91,7 @@ class Preview: Fragment(R.layout.preview) {
 
         override fun onError(camera: CameraDevice, p1: Int) {
             Log.d(TAG, "camera device error")
-            this@Preview.activity?.finish()
+            this@Preview.activity.finish()
         }
     }
 
@@ -132,8 +110,6 @@ class Preview: Fragment(R.layout.preview) {
 
     }
 
-    private lateinit var backgroundThread: HandlerThread
-    private lateinit var backgroundHandler: Handler
 
 
     private val cameraManager by lazy {
@@ -148,22 +124,28 @@ class Preview: Fragment(R.layout.preview) {
             Log.d(TAG,"Got Bundle")
             FRAMERATE = requireArguments().getInt("FRAMERATE")
             video_storage = requireArguments().getString("video_storage")?.let { Path(it) }!!
+            MODE = requireArguments().getInt("mode")
         }
         Log.d(TAG,"Framerate of $FRAMERATE")
         Log.d(TAG,"VideoStorage at $video_storage")
 
     }
 
+
+
+
+
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         Log.d(TAG,"Starting preview fragment")
 
         activity = requireActivity()
+        /**
         //Creating file to store video
         if(!video_storage.exists())
             video_storage.createDirectories()
         video_file = createVideoFile()
-
+*/
         capture_btn = activity.findViewById(R.id.btn_camera)
         swap_camera_btn = activity.findViewById(R.id.swap_camera)
         previewTextureView = activity.findViewById(R.id.textView)
@@ -172,13 +154,19 @@ class Preview: Fragment(R.layout.preview) {
                 if(isChecked){
                     Log.d(TAG,"Capturing video")
                     disable_swap_camera()
-                    startRecordSession()
-                    // mandar frame start vazia
+                    if(MODE==0)
+                        start_counter()
+                    else
+                        start_sender()
+                    recording = true
                 }
                 else{
-                    stopRecordSession()
+                    recording = false
                     enable_swap_camera()
-                    // mandar frame end vazia
+                    if(MODE==0)
+                        stop_counter()
+                    else
+                        stop_sender()
                 }
             }
         swap_camera_btn.setOnClickListener { _ ->
@@ -190,60 +178,94 @@ class Preview: Fragment(R.layout.preview) {
             openCamera()
         }
 
-        val imageReader = ImageReader.newInstance(FRAME_WIDTH, FRAME_HEIGTH,ImageFormat.JPEG,1)
-        imageReader.setOnImageAvailableListener(FrameCallback,backgroundHandler)
+        startBackgroundThread()
+        imageReader = ImageReader.newInstance(FRAME_WIDTH, FRAME_HEIGTH, ImageFormat.YUV_420_888, 1)
+        imageReader.setOnImageAvailableListener({ reader ->
+            //Log.d(TAG, "Image available")
+            if (reader != null) {
+                val image = reader.acquireNextImage()
+                if (recording) {
+                    //Log.d(TAG,"Saving frame")
+                    val bitmap = ImageUtils.yuv420ToBitmap(image, context)
+                    val frame = Frame(bitmap, N_SEQ)
+                    framesFifo.enqueue(frame)
+                    N_SEQ++
+                }
+                image.close()
+            }
+        }
+        , backgroundHandler)
 
+    }
+
+    override fun onResume() {
+        super.onResume()
+        startBackgroundThread()
+        if (previewTextureView.isAvailable) {
+            openCamera()
+        }
+        else
+            previewTextureView.surfaceTextureListener = surfaceListener
+    }
+
+    override fun onPause() {
+        super.onPause()
+        recording = false
+        closeCamera()
+        stopBackgroundThread()
+    }
+
+    /**
+     * Thread that will analyse the frames and check whether event happened
+     */
+    private fun start_counter(){
+        counter = JumpCounter(framesFifo)
+        counter.start()
+        // mandar frame start vazia
+        framesFifo.enqueue(Frame(null,-1,true))
+    }
+
+    /**
+     * Sends empty frame that makes counter thread stop
+     */
+    private fun stop_counter(){
+        // mandar frame end vazia
+        framesFifo.enqueue(Frame(null,-1, isEnd = true))
+    }
+
+    /**
+     * TODO
+     * Thread that will send the frames to the database
+     */
+    private fun start_sender(){
+
+    }
+
+    /**
+     * TODO
+     * Stop sender thread
+     */
+    private fun stop_sender(){
 
     }
 
 
 
     /**
-     * Create a request for the camera, used while not recording to preview camera capture
+     * Create a recording capture to camera
      */
     private fun previewSession() {
-        val surfaceTexture = previewTextureView.surfaceTexture
-        surfaceTexture!!.setDefaultBufferSize(MAX_PREVIEW_WIDTH, MAX_PREVIEW_HEIGHT)
-        val surface = Surface(surfaceTexture)
-
-        captureRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
-        captureRequestBuilder.addTarget(surface)
-
-        cameraDevice.createCaptureSession(Arrays.asList(surface),
-            object: CameraCaptureSession.StateCallback(){
-                override fun onConfigureFailed(session: CameraCaptureSession) {
-                    Log.e(TAG, "creating capture session failded!")
-                }
-
-                override fun onConfigured(session: CameraCaptureSession) {
-                    if (session != null) {
-                        captureSession = session
-                        captureRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE)
-                        captureSession.setRepeatingRequest(captureRequestBuilder.build(), null, null)
-                    }
-                }
-
-            }, backgroundHandler)
-    }
-
-    /**
-     * Create a recording request to camera, used while recording
-     */
-    private fun recordSession() {
-
-        setupMediaRecorder()
 
         val surfaceTexture = previewTextureView.surfaceTexture
         surfaceTexture!!.setDefaultBufferSize(MAX_PREVIEW_WIDTH, MAX_PREVIEW_HEIGHT)
         val textureSurface = Surface(surfaceTexture)
-        val recordSurface = mediaRecorder.surface
 
-        captureRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_RECORD)
+        captureRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
         captureRequestBuilder.addTarget(textureSurface)
-        captureRequestBuilder.addTarget(recordSurface)
+        captureRequestBuilder.addTarget(imageReader.surface)
         val surfaces = ArrayList<Surface>().apply {
             add(textureSurface)
-            add(recordSurface)
+            add(imageReader.surface)
         }
 
         cameraDevice.createCaptureSession(surfaces,
@@ -253,12 +275,10 @@ class Preview: Fragment(R.layout.preview) {
                 }
 
                 override fun onConfigured(session: CameraCaptureSession) {
-                    if (session != null) {
-                        captureSession = session
-                        captureRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE)
-                        captureSession.setRepeatingRequest(captureRequestBuilder.build(), null, null)
-                        mediaRecorder.start()
-                    }
+                    captureSession = session
+                    captureRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE,
+                        CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE)
+                    captureSession.setRepeatingRequest(captureRequestBuilder.build(), null, null)
                 }
 
             }, backgroundHandler)
@@ -285,62 +305,6 @@ class Preview: Fragment(R.layout.preview) {
         }
     }
 
-    @SuppressLint("SimpleDateFormat")
-    private fun createVideoFileName(): String {
-        val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
-        return "VIDEO_${timestamp}.mp4"
-    }
-
-    private fun createVideoFile(): File {
-        val videoFile = File(video_storage.toString(), createVideoFileName())
-        return videoFile
-    }
-
-
-
-    private fun setupMediaRecorder() {
-        val rotation = activity.windowManager?.defaultDisplay?.rotation
-        val sensorOrientation = cameraCharacteristics(
-            cameraId(CameraCharacteristics.LENS_FACING_BACK),
-            CameraCharacteristics.SENSOR_ORIENTATION
-        )
-        //TODO: verificar resoluções diponiveis e escolher a menor mais apropriada
-        val resolutions = cameraManager.getCameraCharacteristics(cameraId(CameraCharacteristics.LENS_FACING_BACK)).get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
-            ?.getOutputSizes(ImageFormat.JPEG)
-        if (resolutions != null) {
-            Log.d(TAG, "Resolutions" )
-            for (resolution in resolutions){
-                Log.d(TAG, resolution.toString())
-            }
-        }
-
-        when (sensorOrientation) {
-            SENSOR_DEFAULT_ORINTATION_DEGREES ->
-                mediaRecorder.setOrientationHint(DEFAULT_ORIENTATION.get(rotation!!))
-            SENSOR_INVERSE_ORINTATION_DEGREES ->
-                mediaRecorder.setOrientationHint(INVERSE_ORIENTATION.get(rotation!!))
-        }
-        mediaRecorder.apply {
-            setVideoSource(MediaRecorder.VideoSource.SURFACE)
-            setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
-            setOutputFile(video_file.outputStream().fd)
-            setVideoEncodingBitRate(10000000)
-            setVideoSize(FRAME_WIDTH, FRAME_HEIGTH)
-            setVideoEncoder(MediaRecorder.VideoEncoder.H264)
-            prepare()
-        }
-    }
-
-    private fun stopMediaRecorder() {
-        mediaRecorder.apply {
-            try {
-                stop()
-                reset()
-            } catch (e: IllegalStateException) {
-                Log.e(TAG, e.toString())
-            }
-        }
-    }
 
     /**
      * Returns the list of characteristics of the camera
@@ -388,33 +352,6 @@ class Preview: Fragment(R.layout.preview) {
         }
     }
 
-
-    private fun startRecordSession() {
-        recordSession()
-    }
-
-    private fun stopRecordSession() {
-        stopMediaRecorder()
-        previewSession()
-    }
-
-
-    override fun onResume() {
-        super.onResume()
-
-        startBackgroundThread()
-        if (previewTextureView.isAvailable)
-            openCamera()
-        else
-            previewTextureView.surfaceTextureListener = surfaceListener
-    }
-
-    override fun onPause() {
-
-        closeCamera()
-        stopBackgroundThread()
-        super.onPause()
-    }
 
     private fun openCamera() {
         connectCamera(current_lens)

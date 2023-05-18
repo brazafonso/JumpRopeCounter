@@ -8,6 +8,8 @@ import com.example.jumpropecounter.R
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
 
 class LoginUserActivity : AppCompatActivity() {
@@ -61,7 +63,6 @@ class LoginUserActivity : AppCompatActivity() {
         if (result.resultCode == RESULT_OK) {
             // Successfully signed in
             Log.d(TAG,"Login Successful")
-            val user = FirebaseAuth.getInstance().currentUser
             finish()
         } else {
             Log.d(TAG,"Login Failed")
