@@ -137,8 +137,8 @@
 
         <LinearLayout
             android:id="@+id/line4"
-            android:layout_width="200dp"
-            android:layout_height="200dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:background="@color/light_background_color"
             android:orientation="vertical"
             app:layout_constraintStart_toStartOf="parent"
@@ -146,8 +146,11 @@
 
             <com.github.mikephil.charting.charts.BarChart
                 android:id="@+id/jumps_day_chart"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_width="338dp"
+                android:layout_height="171dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
+                android:layout_gravity="center"
                 android:background="@android:color/white" />
 
         </LinearLayout>
@@ -204,6 +207,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="24dp"
+        android:backgroundTint="@color/primary_button"
+        android:fontFamily="@font/open_sans_bold"
         android:text="Logout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
