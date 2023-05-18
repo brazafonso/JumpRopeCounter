@@ -17,7 +17,7 @@ class Exercise : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        val jumpRopeButton = requireActivity().findViewById<Button>(R.id.JumpRopeButton)
+        val jumpRopeButton = requireActivity().findViewById<Button>(R.id.jumping_rope)
         jumpRopeButton.setOnClickListener {
             Log.d(TAG,"Going to Jump Rope activity")
             val intent = Intent(activity,JumpRope::class.java)
