@@ -51,8 +51,8 @@ class JumpCounter (val concurrentFIFO: ConcurrentFifo<Frame>) : Thread() {
         val img_test_not_jumping : Bitmap? = loadBitmapFromAssets(getApplicationContext(), "test_not_jumping.jpg")
 
         Log.d(TAG, "Adding test images to FIFO. Is empty: ${this._concurrentFIFO.isEmpty()}")
-        this._concurrentFIFO.enqueue(Frame(img_test_jumping, 0, isStart = true))
-        this._concurrentFIFO.enqueue(Frame(img_test_not_jumping, 1, isEnd = true))
+        //this._concurrentFIFO.enqueue(Frame(img_test_jumping, 0, isStart = true))
+        //this._concurrentFIFO.enqueue(Frame(img_test_not_jumping, 1, isEnd = true))
         Log.d(TAG, "Added test images to FIFO. Is empty: ${this._concurrentFIFO.isEmpty()}")
 
         var module : Module? = null

@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import androidx.fragment.app.Fragment
+import com.example.jumpropecounter.Camera.Preview
 import com.example.jumpropecounter.Exercise.JumpRope
 import com.example.jumpropecounter.R
 
@@ -21,6 +22,7 @@ class Exercise : Fragment() {
         jumpRopeButton.setOnClickListener {
             Log.d(TAG,"Going to Jump Rope activity")
             val intent = Intent(activity,JumpRope::class.java)
+            intent.putExtra("MODE",0)
             startActivity(intent)
         }
     }

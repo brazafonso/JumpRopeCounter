@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.example.jumpropecounter.Camera.Preview
 import com.example.jumpropecounter.DB.Fragments.PhotoSender
+import com.example.jumpropecounter.Exercise.JumpRope
 import com.example.jumpropecounter.Hub.Hub
 import com.example.jumpropecounter.User.User
 import com.example.jumpropecounter.User.activity.LoginUserActivity
@@ -22,6 +23,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var photoSender: PhotoSender
     private lateinit var login_btn: Button
     private lateinit var logout_btn: Button
+
     private lateinit var go_capture_btn: Button
     private var user: User? = null
     private val TAG : String =  "MainActivity"
@@ -53,6 +55,7 @@ class MainActivity : AppCompatActivity() {
         //val jumpCounter = JumpCounter(ConcurrentFifo())
         //jumpCounter.start()
 
+
         go_capture_btn = findViewById(R.id.go_capture_btn)
         login_btn = findViewById(R.id.login_btn)
         logout_btn = findViewById(R.id.logout_btn)
@@ -67,6 +70,18 @@ class MainActivity : AppCompatActivity() {
             Log.d(TAG,"User not logged")
             enable_logout(false)
             enable_login(true)
+        }
+
+        val admin_capture_btn = findViewById<Button>(R.id.admin_capture_btn)
+        admin_capture_btn.setOnClickListener {
+            Log.d(TAG,"Capture mode")
+            // Activity to show and capture video
+            val intent = Intent(this, JumpRope::class.java)
+            intent.putExtra("MODE",1)
+            startActivity(intent)
+            //val myIntent =  Intent(this,teste::class.java)
+            //startActivity(myIntent)
+
         }
 
 

@@ -7,7 +7,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import com.example.jumpropecounter.Camera.Preview
 import com.example.jumpropecounter.R
 import com.example.jumpropecounter.User.User
 import com.github.mikephil.charting.charts.BarChart
@@ -51,6 +53,7 @@ class Home:Fragment() {
 
 
         logout_btn = requireActivity().findViewById(R.id.logout_btn)
+
         jumps_day_chart = requireActivity().findViewById(R.id.jumps_day_chart)
 
         logout_btn.setOnClickListener { _ ->
@@ -58,6 +61,8 @@ class Home:Fragment() {
             user.sign_out()
             requireActivity().finish()
         }
+
+
 
 
 

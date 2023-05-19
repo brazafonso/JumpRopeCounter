@@ -18,6 +18,7 @@ import android.view.*
 import android.widget.ImageButton
 import androidx.appcompat.widget.AppCompatToggleButton
 import androidx.fragment.app.Fragment
+import com.example.jumpropecounter.DB.Fragments.PhotoSender
 import com.example.jumpropecounter.JumpCounter.JumpCounter
 import com.example.jumpropecounter.R
 import com.example.jumpropecounter.Utils.ConcurrentFifo
@@ -40,6 +41,7 @@ class Preview: Fragment(R.layout.preview) {
     private lateinit var captureRequestBuilder: CaptureRequest.Builder
     private lateinit var cameraDevice: CameraDevice
     private lateinit var counter: Thread
+    private lateinit var sender: Thread
 
 
     companion object {
@@ -185,7 +187,7 @@ class Preview: Fragment(R.layout.preview) {
             if (reader != null) {
                 val image = reader.acquireNextImage()
                 if (recording) {
-                    //Log.d(TAG,"Saving frame")
+                    Log.d(TAG,"Saving frame")
                     val bitmap = ImageUtils.yuv420ToBitmap(image, context)
                     val frame = Frame(bitmap, N_SEQ)
                     framesFifo.enqueue(frame)
@@ -238,7 +240,9 @@ class Preview: Fragment(R.layout.preview) {
      * Thread that will send the frames to the database
      */
     private fun start_sender(){
-
+        sender = PhotoSender(framesFifo, FRAMERATE)
+        sender.start()
+        framesFifo.enqueue(Frame(null,-1,true))
     }
 
     /**
@@ -246,7 +250,7 @@ class Preview: Fragment(R.layout.preview) {
      * Stop sender thread
      */
     private fun stop_sender(){
-
+        framesFifo.enqueue(Frame(null,-1, isEnd = true))
     }
 
 

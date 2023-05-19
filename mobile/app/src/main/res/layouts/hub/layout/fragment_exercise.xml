@@ -13,7 +13,7 @@
         android:layout_marginTop="30dp"
         android:layout_marginLeft="20dp"
         android:text="Exercises"
-        android:fontFamily="@font/open_sans_bold"
+
         android:textColor="@color/text"
         android:textSize="34sp"
         android:gravity="left"
@@ -44,22 +44,21 @@
                 android:id="@+id/jumping_rope"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
                 android:layout_marginLeft="20dp"
+                android:layout_marginTop="10dp"
                 android:layout_marginRight="20dp"
                 android:layout_marginBottom="10dp"
                 android:backgroundTint="@color/light_grey"
+                android:drawableRight="@drawable/skipping_rope_size"
+
+                android:gravity="left|center_vertical|right"
                 android:text="Jumping Rope"
-                android:fontFamily="@font/open_sans_bold"
                 android:textColor="@color/text"
                 android:textSize="20sp"
-                android:drawableRight="@drawable/skipping_rope_size"
-                android:gravity="left|center_vertical|right"
                 app:layout_constraintStart_toStartOf="@id/line1"
-                app:layout_constraintTop_toBottomOf="@id/line1"/>
+                app:layout_constraintTop_toBottomOf="@id/line1" />
 
         </LinearLayout>
-
     </LinearLayout>
 
 
