@@ -24,6 +24,7 @@ import com.github.mikephil.charting.utils.ColorTemplate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import kotlin.properties.Delegates
 
 class Home:Fragment() {
@@ -77,26 +78,6 @@ class Home:Fragment() {
         }
 
         update_stats()
-
-        val list:ArrayList<BarEntry> = ArrayList()
-        list.add(BarEntry(100f,100f,"Monday"))
-        list.add(BarEntry(101f,101f,"Tuesday"))
-        list.add(BarEntry(102f,102f,"Wednesday"))
-        list.add(BarEntry(103f,103f,"Thursday"))
-        list.add(BarEntry(104f,104f,"Friday"))
-
-        val barDataSet = BarDataSet(list,"list")
-
-        barDataSet.setColors(ColorTemplate.MATERIAL_COLORS,255)
-        barDataSet.valueTextColor= Color.BLACK
-
-        val barData = BarData(barDataSet)
-
-        jumps_day_chart.data = barData
-
-        jumps_day_chart.description.text = "bar chart"
-
-
     }
 
     /**
@@ -109,6 +90,34 @@ class Home:Fragment() {
                 val stats = user.get_stats(sessions, JUMP_TYPE_ACTIVITY)
                 n_jumps.text = stats["total_reps"].toString()
                 day_streak.text = stats["streak"].toString()
+
+                // Feed daily jumps graph
+                val daily_reps = stats["daily_reps"] as LinkedHashMap<LocalDate,Int>
+                val sorted_daily_reps = daily_reps.toSortedMap()
+                val list:ArrayList<BarEntry> = ArrayList()
+                var x = 0F
+                for(date in sorted_daily_reps){
+                    list.add(BarEntry(x,date.value.toFloat()))
+                    x += 1
+                }
+
+                val barDataSet = BarDataSet(list,"list")
+
+                barDataSet.setColors(ColorTemplate.MATERIAL_COLORS,255)
+                barDataSet.valueTextColor= Color.BLACK
+
+                val barData = BarData(barDataSet)
+
+                jumps_day_chart.data = barData
+
+                jumps_day_chart.description.text = "bar chart"
+                // refresh chart
+                jumps_day_chart.notifyDataSetChanged()
+                jumps_day_chart.invalidate()
+
+                Log.d(TAG,"Done with stats")
+
+
             }
         }
     }

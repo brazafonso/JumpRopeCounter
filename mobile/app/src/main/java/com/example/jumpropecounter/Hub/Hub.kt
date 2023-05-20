@@ -49,7 +49,7 @@ class Hub : AppCompatActivity() {
                 selectedFragment = Exercise()
             }
             R.id.settings -> {
-                selectedFragment = Settings()
+                selectedFragment = Settings.newInstance(user)
             }
         }
         // It will help to replace the

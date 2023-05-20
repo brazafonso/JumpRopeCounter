@@ -16,6 +16,7 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.collections.LinkedHashMap
 import kotlin.coroutines.coroutineContext
 
 const val DB_USER_PATH = "users"
@@ -32,6 +33,15 @@ class User (user_id:String,username:String?,email:String?):Parcelable{
     var total_jumps = 0
     var permission_level = 0
     var created = System.currentTimeMillis()
+
+
+    /**
+     * Changes user username
+     */
+    fun change_username(new_usernam:String){
+        username = new_usernam
+        update_user_data()
+    }
 
 
     /**
@@ -56,6 +66,10 @@ class User (user_id:String,username:String?,email:String?):Parcelable{
         val db_session_reference = Firebase.database.reference.child("$DB_SESSION_PATH/$user_id/${session.start}")
         db_session_reference.setValue(session)
     }
+
+    /**
+     * Gets all of the user's sessions
+     */
     suspend fun get_sessions(): ArrayList<Session> {
         val session_list = ArrayList<Session>()
         val db_session_reference = Firebase.database.reference.child("$DB_SESSION_PATH/$user_id")
@@ -69,43 +83,74 @@ class User (user_id:String,username:String?,email:String?):Parcelable{
     }
 
     /**
+     * Resets all of the user's data
+     */
+    fun reset_sessions(){
+        val db_session_reference = Firebase.database.reference.child("$DB_SESSION_PATH/$user_id")
+        db_session_reference.removeValue()
+            .addOnSuccessListener {
+                Log.d(TAG,"Data reset")
+        }
+            .addOnFailureListener {
+                Log.d(TAG,"Error reseting data")
+            }
+    }
+
+
+
+    /**
      * Returns a dictionary of stats from sessions of given activity
      */
     fun get_stats(sessions:ArrayList<Session>,type_activity: String?):Map<String,Any>{
-        var total_reps = 0
-        var streak = 0
+        var total_reps = 0 // total reps in history
+        var streak = 0     // consecutive days using the app, where last cant be more than a day ago
+        val daily_reps  = LinkedHashMap<LocalDate, Int>() // list of jumps per day
         var last_day: LocalDate? = null
         val now = Instant.now().toEpochMilli()
         val today = Instant.ofEpochMilli(now).atZone(ZoneId.systemDefault()).toLocalDate()
 
-        for(session in sessions.filter { s -> s.type_activity == type_activity }.sortedBy { s -> s.start }){
-            total_reps += session.total_reps
 
-            // Check daily streak
-            val instant = Instant.ofEpochMilli(now).atZone(ZoneId.systemDefault())
+        if(sessions.isNotEmpty()) {
+            val filteres_sessions = sessions.filter { s -> s.type_activity == type_activity }.sortedBy { s -> s.start }
+            val instant = Instant.ofEpochMilli(filteres_sessions[0].start).atZone(ZoneId.systemDefault())
             val day = instant.toLocalDate()
-            if(last_day == null){
-                streak = 1
-            }else{
-                if(last_day.plusDays(1).dayOfYear == day.dayOfYear){
-                    streak += 1
+            for (session in filteres_sessions) {
+                total_reps += session.total_reps
+
+
+                val instant = Instant.ofEpochMilli(session.start).atZone(ZoneId.systemDefault())
+                val day = instant.toLocalDate()
+                // Update daily jumps
+                if(daily_reps.containsKey(day)){
+                    daily_reps[day] = daily_reps[day]!! + session.total_reps
                 }else{
-                    streak = 0
+                    daily_reps[day] = session.total_reps
                 }
+                // Check daily streak
+                if (last_day == null) {
+                    streak = 1
+                } else {
+                    if (last_day.plusDays(1).dayOfYear == day.dayOfYear) {
+                        streak += 1
+                    } else {
+                        streak = 1
+                    }
+                }
+                last_day = day
             }
-            last_day = day
-        }
-        // Last streak check with current day
-        if(last_day != null){
-            if(last_day.plusDays(1).dayOfYear == today.dayOfYear)
-                streak += 1
-            else if(last_day != today)
-                streak = 0
+            // Last streak check with current day
+            if (last_day != null) {
+                if (last_day.plusDays(1).dayOfYear == today.dayOfYear)
+                    streak += 1
+                else if (last_day != today)
+                    streak = 0
+            }
         }
 
         return mapOf(
         "total_reps" to total_reps,
-        "streak" to streak
+        "streak" to streak,
+        "daily_reps" to daily_reps
         )
 
     }
@@ -121,6 +166,7 @@ class User (user_id:String,username:String?,email:String?):Parcelable{
         }
         return total
     }
+
 
 
     /**
