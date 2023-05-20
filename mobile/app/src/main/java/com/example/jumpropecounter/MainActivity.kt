@@ -37,6 +37,14 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Check logged info (using firebase)
+        val u = FirebaseAuth.getInstance().currentUser
+        if(u!=null){
+            Log.d(TAG,"Logged User")
+            get_user(u)
+            go_hub_activity()
+        }
+
         Log.d(TAG,"Loading View")
         setContentView(R.layout.activity_main)
         Log.d(TAG,"Starting Program")
@@ -51,26 +59,13 @@ class MainActivity : AppCompatActivity() {
         // Get permissions
         get_permissions()
 
-        // Testing jump counter model
-        //val jumpCounter = JumpCounter(ConcurrentFifo())
-        //jumpCounter.start()
-
-
         go_capture_btn = findViewById(R.id.go_capture_btn)
         login_btn = findViewById(R.id.login_btn)
         logout_btn = findViewById(R.id.logout_btn)
 
-        // Check logged info (using firebase)
-        val u = FirebaseAuth.getInstance().currentUser
-        if(u!=null){
-            Log.d(TAG,"Logged User")
-            get_user(u)
-            go_hub_activity()
-        }else{
-            Log.d(TAG,"User not logged")
-            enable_logout(false)
-            enable_login(true)
-        }
+        Log.d(TAG,"User not logged")
+        enable_logout(false)
+        enable_login(true)
 
         val admin_capture_btn = findViewById<Button>(R.id.admin_capture_btn)
         admin_capture_btn.setOnClickListener {
@@ -79,9 +74,6 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, JumpRope::class.java)
             intent.putExtra("MODE",1)
             startActivity(intent)
-            //val myIntent =  Intent(this,teste::class.java)
-            //startActivity(myIntent)
-
         }
 
 
@@ -91,9 +83,6 @@ class MainActivity : AppCompatActivity() {
             // Activity to show and capture video
             val previewFragment = Preview.newInstance(frameRate,getSharedPreferences("prefs",MODE_PRIVATE).getString("app_path",null) + recording_folder,0)
             addFragment(previewFragment)
-            //val myIntent =  Intent(this,teste::class.java)
-            //startActivity(myIntent)
-
         }
 
 

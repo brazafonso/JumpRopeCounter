@@ -8,12 +8,24 @@ import kotlin.properties.Delegates
 
 
 const val DB_SESSION_PATH = "sessions"
-class Session(user_id:String) {
-    private val TAG = "Session"
+class Session(val user_id: String) {
+    val TAG = "Session"
+    // Session start and end
     val start = System.currentTimeMillis()
     var end:Long = -1
-    val user_id = user_id
-    var total_reps = 0
+
+    // Counter can be observed by other classes
+    var counter_refreshListListeners = ArrayList<InterfaceRefreshList>()
+    var total_reps:Int by Delegates.observable(0){ property, oldValue, newValue ->
+        counter_refreshListListeners.forEach {
+            it.refreshListRequest()
+        }
+    }
+    interface InterfaceRefreshList {
+        fun refreshListRequest()
+    }
+
+
 
 
     /**
@@ -44,7 +56,7 @@ class Session(user_id:String) {
      * Creates session in database
      */
     fun create_session_data(){
-        Firebase.database.reference.child("sessions/$user_id/$start").setValue(this)
+        Firebase.database.reference.child("$DB_SESSION_PATH/$user_id/$start").setValue(to_map())
             .addOnSuccessListener { Log.d(TAG,"Session created successfully") }
             .addOnFailureListener { Log.d(TAG,"Error creating session") }
     }
@@ -58,7 +70,16 @@ class Session(user_id:String) {
         end = map["end"].toString().toLong()
     }
 
-
-
+    /**
+     * Turn session to map
+     */
+    fun to_map():Map<String, Any?> {
+        return mapOf(
+            "user_di" to user_id,
+            "start" to start,
+            "end" to end,
+            "total_reps" to total_reps,
+        )
+    }
 
 }
