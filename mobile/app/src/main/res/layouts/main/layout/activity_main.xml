@@ -52,12 +52,12 @@
     <FrameLayout
         android:id="@+id/fragmentPreviewContainer"
         android:name="com.example.jumpropecounter.Camera.Preview"
-        android:layout_width="353dp"
-        android:layout_height="390dp"
+        android:layout_width="317dp"
+        android:layout_height="323dp"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
-        android:layout_marginStart="37dp"
-        android:layout_marginTop="36dp" />
+        android:layout_marginStart="52dp"
+        android:layout_marginTop="4dp" />
 
 
 </RelativeLayout>

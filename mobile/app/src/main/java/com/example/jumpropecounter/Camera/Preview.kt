@@ -79,7 +79,7 @@ class Preview: Fragment(R.layout.preview) {
 
     private lateinit var counter: Thread // Thread to run ai model
     private lateinit var sender: Thread // Thread to run sender of frames to firebase storage
-    private lateinit var session: Session // Session that will be sent to firebase to save the results of activity
+    private var session: Session? = null// Session that will be sent to firebase to save the results of activity
     private var user  = FirebaseAuth.getInstance().currentUser // current logged user
 
 
@@ -243,9 +243,9 @@ class Preview: Fragment(R.layout.preview) {
         if(user!=null) {
             session = Session(user!!.uid)
             // updates total reps value with session counter
-            session.counter_refreshListListeners.add(object : Session.InterfaceRefreshList {
+            session!!.counter_refreshListListeners.add(object : Session.InterfaceRefreshList {
                 override fun refreshListRequest() {
-                    total_reps = session.total_reps
+                    total_reps = session!!.total_reps
                 }
             })
         }
