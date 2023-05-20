@@ -213,6 +213,7 @@ class Preview: Fragment(R.layout.preview) {
     override fun onPause() {
         super.onPause()
         recording = false
+        Log.d(TAG, "Ended recording with $N_SEQ frames")
         closeCamera()
         stopBackgroundThread()
     }
