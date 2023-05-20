@@ -8,10 +8,10 @@ import kotlin.properties.Delegates
 
 
 const val DB_SESSION_PATH = "sessions"
-class Session(val user_id: String) {
+class Session(val user_id: String, var type_activity:String?) {
     val TAG = "Session"
     // Session start and end
-    val start = System.currentTimeMillis()
+    var start = System.currentTimeMillis()
     var end:Long = -1
 
     // Counter can be observed by other classes
@@ -66,8 +66,10 @@ class Session(val user_id: String) {
      */
     fun update_from_map(value: Any?) {
         val map = value as Map<*, *>
-        total_reps = map["total_reps"].toString().toInt()
+        start = map["start"].toString().toLong()
         end = map["end"].toString().toLong()
+        total_reps = map["total_reps"].toString().toInt()
+        type_activity = map["type_activity"].toString()
     }
 
     /**
@@ -75,10 +77,11 @@ class Session(val user_id: String) {
      */
     fun to_map():Map<String, Any?> {
         return mapOf(
-            "user_di" to user_id,
+            "user_id" to user_id,
             "start" to start,
             "end" to end,
             "total_reps" to total_reps,
+            "type_activity" to type_activity
         )
     }
 

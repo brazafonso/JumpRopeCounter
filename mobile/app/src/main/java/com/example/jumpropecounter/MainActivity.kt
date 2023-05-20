@@ -19,6 +19,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 
 const val EXTRA_USER = "user"
+const val JUMP_TYPE_ACTIVITY = "jump_rope"
 class MainActivity : AppCompatActivity() {
     private lateinit var photoSender: PhotoSender
     private lateinit var login_btn: Button
@@ -81,7 +82,11 @@ class MainActivity : AppCompatActivity() {
             Log.d(TAG,"Capture mode")
             getDir("files", MODE_PRIVATE)
             // Activity to show and capture video
-            val previewFragment = Preview.newInstance(frameRate,getSharedPreferences("prefs",MODE_PRIVATE).getString("app_path",null) + recording_folder,0)
+            val previewFragment =
+                Preview.newInstance(frameRate,
+                getSharedPreferences("prefs",MODE_PRIVATE).getString("app_path",null) + recording_folder,
+                JUMP_TYPE_ACTIVITY,
+                    0)
             addFragment(previewFragment)
         }
 

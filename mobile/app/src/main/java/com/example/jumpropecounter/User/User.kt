@@ -9,6 +9,13 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.tasks.await
+import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.coroutines.coroutineContext
 
 const val DB_USER_PATH = "users"
@@ -38,8 +45,8 @@ class User (user_id:String,username:String?,email:String?):Parcelable{
     /**
      * Creates a new session
      */
-    fun create_session(): Session {
-        return Session(user_id)
+    fun create_session(type_activity:String?): Session {
+        return Session(user_id, type_activity)
     }
 
     /**
@@ -49,7 +56,71 @@ class User (user_id:String,username:String?,email:String?):Parcelable{
         val db_session_reference = Firebase.database.reference.child("$DB_SESSION_PATH/$user_id/${session.start}")
         db_session_reference.setValue(session)
     }
+    suspend fun get_sessions(): ArrayList<Session> {
+        val session_list = ArrayList<Session>()
+        val db_session_reference = Firebase.database.reference.child("$DB_SESSION_PATH/$user_id")
+        val list = db_session_reference.get().await().children
+        for(child in list){
+            val session = Session("user_id",null)
+            session.update_from_map(child.value)
+            session_list.add(session)
+        }
+        return session_list
+    }
 
+    /**
+     * Returns a dictionary of stats from sessions of given activity
+     */
+    fun get_stats(sessions:ArrayList<Session>,type_activity: String?):Map<String,Any>{
+        var total_reps = 0
+        var streak = 0
+        var last_day: LocalDate? = null
+        val now = Instant.now().toEpochMilli()
+        val today = Instant.ofEpochMilli(now).atZone(ZoneId.systemDefault()).toLocalDate()
+
+        for(session in sessions.filter { s -> s.type_activity == type_activity }.sortedBy { s -> s.start }){
+            total_reps += session.total_reps
+
+            // Check daily streak
+            val instant = Instant.ofEpochMilli(now).atZone(ZoneId.systemDefault())
+            val day = instant.toLocalDate()
+            if(last_day == null){
+                streak = 1
+            }else{
+                if(last_day.plusDays(1).dayOfYear == day.dayOfYear){
+                    streak += 1
+                }else{
+                    streak = 0
+                }
+            }
+            last_day = day
+        }
+        // Last streak check with current day
+        if(last_day != null){
+            if(last_day.plusDays(1).dayOfYear == today.dayOfYear)
+                streak += 1
+            else if(last_day != today)
+                streak = 0
+        }
+
+        return mapOf(
+        "total_reps" to total_reps,
+        "streak" to streak
+        )
+
+    }
+
+
+    /**
+     * Get total reps from sessions of given activity
+     */
+    fun get_total_reps(sessions:ArrayList<Session>,type_activity: String?): Int {
+        var total = 0
+        for(session in sessions.filter { s -> s.type_activity == type_activity }){
+            total += session.total_reps
+        }
+        return total
+    }
 
 
     /**

@@ -37,6 +37,7 @@ import kotlin.properties.Delegates
 class Preview: Fragment(R.layout.preview) {
     // Default values for capture
     private val TAG = "preview"
+    private lateinit var type_activity:String
     private val MAX_PREVIEW_WIDTH = 320
     private val MAX_PREVIEW_HEIGHT = 240
     private var FRAME_WIDTH = 320
@@ -89,11 +90,12 @@ class Preview: Fragment(R.layout.preview) {
 
 
     companion object {
-        fun newInstance(frameRate:Int,video_storage:String?,mode:Int):Preview{
+        fun newInstance(frameRate:Int,video_storage:String?,type_activity:String?,mode:Int):Preview{
             val fragment = Preview()
             val args = Bundle()
             args.putInt("FRAMERATE",frameRate)
             args.putString("video_storage",video_storage)
+            args.putString("type_activity",type_activity)
             args.putInt("mode",mode)
             fragment.arguments = args
             return fragment
@@ -143,11 +145,13 @@ class Preview: Fragment(R.layout.preview) {
             Log.d(TAG,"Got Bundle")
             FRAMERATE = requireArguments().getInt("FRAMERATE")
             video_storage = requireArguments().getString("video_storage")?.let { Path(it) }!!
+            type_activity = requireArguments().getString("type_activity")?:""
             MODE = requireArguments().getInt("mode")
             min_capture_rest = (1/FRAMERATE * 1000).toLong()
         }
         Log.d(TAG,"Framerate of $FRAMERATE")
         Log.d(TAG,"VideoStorage at $video_storage")
+        Log.d(TAG,"Type activity $type_activity")
 
     }
 
@@ -241,7 +245,7 @@ class Preview: Fragment(R.layout.preview) {
     private fun start_counter(){
         // if user available will create a session to save results
         if(user!=null) {
-            session = Session(user!!.uid)
+            session = Session(user!!.uid,type_activity)
             // updates total reps value with session counter
             session!!.counter_refreshListListeners.add(object : Session.InterfaceRefreshList {
                 override fun refreshListRequest() {
