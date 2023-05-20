@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background_color">
@@ -145,7 +144,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/line3">
 
-                <com.github.mikephil.charting.charts.BarChart
+                <com.github.mikephil.charting.charts.LineChart
                     android:id="@+id/jumps_day_chart"
                     android:layout_width="350dp"
                     android:layout_height="200dp"
@@ -189,14 +188,14 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/line5">
 
-                <ImageView
-                    android:id="@+id/dashboard2"
-                    android:layout_width="338dp"
-                    android:layout_height="250dp"
+                <com.github.mikephil.charting.charts.LineChart
+                    android:id="@+id/calories_day_chart"
+                    android:layout_width="350dp"
+                    android:layout_height="200dp"
                     android:layout_gravity="center"
                     android:layout_marginTop="10dp"
                     android:layout_marginBottom="10dp"
-                    android:src="@drawable/sample_chart" />
+                    android:background="@android:color/white" />
 
             </LinearLayout>
 

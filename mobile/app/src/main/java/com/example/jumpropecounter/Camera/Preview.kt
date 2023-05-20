@@ -3,7 +3,6 @@ package com.example.jumpropecounter.Camera
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
-import android.graphics.BitmapFactory
 import android.graphics.ImageFormat
 import android.graphics.SurfaceTexture
 import android.hardware.camera2.*
@@ -11,12 +10,9 @@ import android.media.*
 import android.os.Bundle
 import android.os.Handler
 import android.os.HandlerThread
-import android.os.ParcelFileDescriptor
 import android.util.Log
-import android.util.SparseIntArray
 import android.view.*
 import android.widget.ImageButton
-import android.widget.TextView
 import androidx.appcompat.widget.AppCompatToggleButton
 import androidx.fragment.app.Fragment
 import com.example.jumpropecounter.DB.Fragments.PhotoSender
@@ -27,9 +23,7 @@ import com.example.jumpropecounter.Utils.ConcurrentFifo
 import com.example.jumpropecounter.Utils.Frame
 import com.google.firebase.auth.FirebaseAuth
 import java.io.File
-import java.io.FileOutputStream
 import java.nio.file.Path
-import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.io.path.*
 import kotlin.properties.Delegates
@@ -247,6 +241,7 @@ class Preview: Fragment(R.layout.preview) {
         // if user available will create a session to save results
         if(user!=null) {
             session = Session(user!!.uid,type_activity)
+            session!!.update_with_user_date()
             // updates total reps value with session counter
             session!!.counter_refreshListListeners.add(object : Session.InterfaceRefreshList {
                 override fun refreshListRequest() {
