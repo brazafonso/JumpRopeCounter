@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory
 import com.example.jumpropecounter.Utils.ConcurrentFifo
 import com.example.jumpropecounter.Utils.Frame
 import android.util.Log
+import com.example.jumpropecounter.User.Session
 import com.firebase.ui.auth.AuthUI.getApplicationContext
 import org.pytorch.IValue
 import org.pytorch.Module
@@ -16,7 +17,7 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
 
-class JumpCounter (val concurrentFIFO: ConcurrentFifo<Frame>) : Thread() {
+class JumpCounter (val concurrentFIFO: ConcurrentFifo<Frame>,session: Session?) : Thread() {
 
     private val TAG : String =  "JumpCounter"
 
@@ -24,11 +25,13 @@ class JumpCounter (val concurrentFIFO: ConcurrentFifo<Frame>) : Thread() {
     private val NO_JUMP : String = "no_jump"
     private val ERROR : String = "error"
 
+
     // Shared FIFO between Preview and JumpCounter
     private val _concurrentFIFO : ConcurrentFifo<Frame> = concurrentFIFO
 
     // Current jump count
     private var _jumpCount : Int = 0
+    val session = session
 
 
     fun loadBitmapFromAssets(context: Context, fileName: String): Bitmap? {
@@ -101,6 +104,8 @@ class JumpCounter (val concurrentFIFO: ConcurrentFifo<Frame>) : Thread() {
                         if (jumpList.isEmpty() or (!jumpList.isEmpty() && !jumpList.last()))
                         {
                             this._jumpCount++
+                            if (session!=null)
+                                session.total_reps++
                         }
                     }
                     jumpList.add(jumping)
@@ -109,6 +114,10 @@ class JumpCounter (val concurrentFIFO: ConcurrentFifo<Frame>) : Thread() {
                 // Check if we reached the end of the video
                 if (frame.is_end())
                 {
+                    if (session!= null) { // Sends session to firebase
+                        session.end = System.currentTimeMillis()
+                        session.create_session_data()
+                    }
                     Log.d(TAG, "Total jump count: ${this._jumpCount}")
                     Log.d(TAG, "Jump list: $jumpList")
                 }

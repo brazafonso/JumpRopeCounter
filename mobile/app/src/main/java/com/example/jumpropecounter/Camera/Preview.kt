@@ -16,22 +16,52 @@ import android.util.Log
 import android.util.SparseIntArray
 import android.view.*
 import android.widget.ImageButton
+import android.widget.TextView
 import androidx.appcompat.widget.AppCompatToggleButton
 import androidx.fragment.app.Fragment
 import com.example.jumpropecounter.DB.Fragments.PhotoSender
 import com.example.jumpropecounter.JumpCounter.JumpCounter
 import com.example.jumpropecounter.R
+import com.example.jumpropecounter.User.Session
 import com.example.jumpropecounter.Utils.ConcurrentFifo
 import com.example.jumpropecounter.Utils.Frame
+import com.google.firebase.auth.FirebaseAuth
 import java.io.File
 import java.io.FileOutputStream
 import java.nio.file.Path
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.io.path.*
+import kotlin.properties.Delegates
 
 class Preview: Fragment(R.layout.preview) {
+    // Default values for capture
+    private val TAG = "preview"
+    private val MAX_PREVIEW_WIDTH = 320
+    private val MAX_PREVIEW_HEIGHT = 240
+    private var FRAME_WIDTH = 320
+    private var FRAME_HEIGTH = 240
+    private var FRAMERATE = 20
+    private var min_capture_rest:Long = (1/FRAMERATE * 1000).toLong() // miliseconds between frame capture
+    private var MODE = 0 // operation mode (normal-0 or dev-1), defines if frames are sent to firebase or to ai model
+    private var N_SEQ = 0
+    private var recording = false
+    private var framesFifo =  ConcurrentFifo<Frame>() // stack to store frames
+    private var current_lens = CameraCharacteristics.LENS_FACING_BACK //default lens
+    private var last_capture:Long = 0
 
+    // Setup observable counter for the activities that create this fragment
+    var counter_refreshListListeners = ArrayList<InterfaceRefreshList>()
+    var total_reps:Int by Delegates.observable(0){ property, oldValue, newValue ->
+        counter_refreshListListeners.forEach {
+            it.refreshListRequest()
+        }
+    }
+    interface InterfaceRefreshList {
+        fun refreshListRequest()
+    }
+
+    // Necessary elements for capture
     private lateinit var activity:Activity
     private lateinit var previewTextureView :TextureView
     private lateinit var imageReader: ImageReader
@@ -40,12 +70,26 @@ class Preview: Fragment(R.layout.preview) {
     private lateinit var captureSession: CameraCaptureSession
     private lateinit var captureRequestBuilder: CaptureRequest.Builder
     private lateinit var cameraDevice: CameraDevice
-    private lateinit var counter: Thread
-    private lateinit var sender: Thread
+    private lateinit var backgroundThread: HandlerThread
+    private lateinit var backgroundHandler: Handler
+    private val cameraManager by lazy {
+        activity.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+    }
+
+
+    private lateinit var counter: Thread // Thread to run ai model
+    private lateinit var sender: Thread // Thread to run sender of frames to firebase storage
+    private var session: Session? = null// Session that will be sent to firebase to save the results of activity
+    private var user  = FirebaseAuth.getInstance().currentUser // current logged user
+
+
+    // For saving video or frames
+    private lateinit var video_storage: Path
+    private lateinit var video_file: File
 
 
     companion object {
-        fun newInstance(frameRate:Int,video_storage:String,mode:Int):Preview{
+        fun newInstance(frameRate:Int,video_storage:String?,mode:Int):Preview{
             val fragment = Preview()
             val args = Bundle()
             args.putInt("FRAMERATE",frameRate)
@@ -54,30 +98,9 @@ class Preview: Fragment(R.layout.preview) {
             fragment.arguments = args
             return fragment
         }
-
-        private val TAG = "preview"
-        private val MAX_PREVIEW_WIDTH = 1280
-        private val MAX_PREVIEW_HEIGHT = 720
-        private var FRAME_WIDTH = 320
-        private var FRAME_HEIGTH = 240
-        private var FRAMERATE = 20
-        private var MODE = 0 // opertaion mode (normal or dev)
-        private var N_SEQ = 0
-        private var recording = false
-        private var framesFifo =  ConcurrentFifo<Frame>() // stack to store frames
-        private lateinit var backgroundThread: HandlerThread
-        private lateinit var backgroundHandler: Handler
-        
-
-        // For saving video or frames
-        private lateinit var video_storage: Path
-        private lateinit var video_file: File
-
-        private var current_lens = CameraCharacteristics.LENS_FACING_BACK
-
     }
 
-
+    // Camera open callback
     private val deviceStateCallback = object: CameraDevice.StateCallback() {
         override fun onOpened(camera: CameraDevice) {
             Log.d(TAG, "camera device opened")
@@ -97,6 +120,7 @@ class Preview: Fragment(R.layout.preview) {
         }
     }
 
+    // Preview surface listener
     private val surfaceListener = object: TextureView.SurfaceTextureListener {
         override fun onSurfaceTextureSizeChanged(p0: SurfaceTexture, width: Int, height: Int) {
         }
@@ -109,13 +133,6 @@ class Preview: Fragment(R.layout.preview) {
             Log.d(TAG, "textureSurface width: $width height: $height")
             openCamera()
         }
-
-    }
-
-
-
-    private val cameraManager by lazy {
-        activity.getSystemService(Context.CAMERA_SERVICE) as CameraManager
     }
 
 
@@ -127,6 +144,7 @@ class Preview: Fragment(R.layout.preview) {
             FRAMERATE = requireArguments().getInt("FRAMERATE")
             video_storage = requireArguments().getString("video_storage")?.let { Path(it) }!!
             MODE = requireArguments().getInt("mode")
+            min_capture_rest = (1/FRAMERATE * 1000).toLong()
         }
         Log.d(TAG,"Framerate of $FRAMERATE")
         Log.d(TAG,"VideoStorage at $video_storage")
@@ -135,34 +153,29 @@ class Preview: Fragment(R.layout.preview) {
 
 
 
-
-
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         Log.d(TAG,"Starting preview fragment")
 
         activity = requireActivity()
-        /**
-        //Creating file to store video
-        if(!video_storage.exists())
-            video_storage.createDirectories()
-        video_file = createVideoFile()
-*/
         capture_btn = activity.findViewById(R.id.btn_camera)
         swap_camera_btn = activity.findViewById(R.id.swap_camera)
         previewTextureView = activity.findViewById(R.id.textView)
+
         // Capture button
         capture_btn.setOnCheckedChangeListener{ _, isChecked ->
                 if(isChecked){
+                    // Start recording
                     Log.d(TAG,"Capturing video")
-                    disable_swap_camera()
-                    if(MODE==0)
+                    disable_swap_camera() // Cant change camera during recording
+                    if(MODE==0) // Normal mode (count activity)
                         start_counter()
-                    else
+                    else // Dev mode, send frames to storage
                         start_sender()
                     recording = true
                 }
                 else{
+                    // Stop recording
                     recording = false
                     enable_swap_camera()
                     if(MODE==0)
@@ -171,6 +184,7 @@ class Preview: Fragment(R.layout.preview) {
                         stop_sender()
                 }
             }
+        // Swap camera button
         swap_camera_btn.setOnClickListener { _ ->
             if(current_lens == CameraCharacteristics.LENS_FACING_BACK)
                 current_lens = CameraCharacteristics.LENS_FACING_FRONT
@@ -181,13 +195,17 @@ class Preview: Fragment(R.layout.preview) {
         }
 
         startBackgroundThread()
+        // ImageReader allows to save frames
         imageReader = ImageReader.newInstance(FRAME_WIDTH, FRAME_HEIGTH, ImageFormat.YUV_420_888, 1)
         imageReader.setOnImageAvailableListener({ reader ->
             //Log.d(TAG, "Image available")
             if (reader != null) {
+                val current_time = System.currentTimeMillis()
                 val image = reader.acquireNextImage()
-                if (recording) {
-                    Log.d(TAG,"Saving frame")
+                // only treats frame if its in recording mode and respects frame rate
+                if (recording && current_time - last_capture >= min_capture_rest ) {
+                    //Log.d(TAG,"Saving frame")
+                    last_capture = current_time
                     val bitmap = ImageUtils.yuv420ToBitmap(image, context)
                     val frame = Frame(bitmap, N_SEQ)
                     framesFifo.enqueue(frame)
@@ -222,9 +240,19 @@ class Preview: Fragment(R.layout.preview) {
      * Thread that will analyse the frames and check whether event happened
      */
     private fun start_counter(){
-        counter = JumpCounter(framesFifo)
+        // if user available will create a session to save results
+        if(user!=null) {
+            session = Session(user!!.uid)
+            // updates total reps value with session counter
+            session!!.counter_refreshListListeners.add(object : Session.InterfaceRefreshList {
+                override fun refreshListRequest() {
+                    total_reps = session!!.total_reps
+                }
+            })
+        }
+        counter = JumpCounter(framesFifo,session)
         counter.start()
-        // mandar frame start vazia
+        // Send the start frame, with no image
         framesFifo.enqueue(Frame(null,-1,true))
     }
 
@@ -232,12 +260,12 @@ class Preview: Fragment(R.layout.preview) {
      * Sends empty frame that makes counter thread stop
      */
     private fun stop_counter(){
-        // mandar frame end vazia
+        // Send end frame, with no image, allows thread to know when to stop
         framesFifo.enqueue(Frame(null,-1, isEnd = true))
+        Log.d(TAG,"Total jumps: $total_reps")
     }
 
     /**
-     * TODO
      * Thread that will send the frames to the database
      */
     private fun start_sender(){
@@ -247,7 +275,6 @@ class Preview: Fragment(R.layout.preview) {
     }
 
     /**
-     * TODO
      * Stop sender thread
      */
     private fun stop_sender(){
@@ -257,7 +284,7 @@ class Preview: Fragment(R.layout.preview) {
 
 
     /**
-     * Create a recording capture to camera
+     * Create a session to capture from camera
      */
     private fun previewSession() {
 
@@ -266,6 +293,7 @@ class Preview: Fragment(R.layout.preview) {
         val textureSurface = Surface(surfaceTexture)
 
         captureRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
+        // Send image to preview surface and image reader
         captureRequestBuilder.addTarget(textureSurface)
         captureRequestBuilder.addTarget(imageReader.surface)
         val surfaces = ArrayList<Surface>().apply {
@@ -289,6 +317,9 @@ class Preview: Fragment(R.layout.preview) {
             }, backgroundHandler)
     }
 
+    /**
+     * Terminates the capture session
+     */
     private fun closeCamera() {
         if (this::captureSession.isInitialized)
             captureSession.close()
@@ -363,11 +394,17 @@ class Preview: Fragment(R.layout.preview) {
     }
 
 
+    /**
+     * Enable swap camera button
+     */
     private fun enable_swap_camera(){
         swap_camera_btn.visibility = View.VISIBLE
         swap_camera_btn.isEnabled = true
     }
 
+    /**
+     * Disable swap camera button
+     */
     private fun disable_swap_camera(){
         swap_camera_btn.visibility = View.INVISIBLE
         swap_camera_btn.isEnabled = false
