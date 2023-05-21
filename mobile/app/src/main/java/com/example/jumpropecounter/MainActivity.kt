@@ -34,7 +34,7 @@ class MainActivity : AppCompatActivity() {
     private var user: User? = null
     private val TAG : String =  "MainActivity"
     private var u: FirebaseUser? = null
-    var frameRate = 10
+    var frameRate = 20
 
 
     /**
