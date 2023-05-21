@@ -9,34 +9,40 @@
     <TextureView
         android:id="@+id/textView"
         android:layout_width="wrap_content"
-        android:layout_height="500dp"
-        android:layout_centerVertical="true" />
+        android:layout_height="500dp" />
+
+
+    <Spinner
+        android:id="@+id/camera_timer"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="85dp"
+        android:layout_marginTop="450dp"
+        android:visibility="visible" />
 
     <androidx.appcompat.widget.AppCompatToggleButton
         android:id="@+id/btn_camera"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
+        android:layout_height="50dp"
         android:layout_centerHorizontal="true"
+        android:layout_marginTop="430dp"
         android:checked="false"
         android:textOff="record"
-        android:textOn="stop recording"
-        tools:layout_editor_absoluteX="178dp"
-        tools:layout_editor_absoluteY="573dp" />
+        android:textOn="stop recording" />
 
     <ImageButton
         android:id="@+id/swap_camera"
-        android:layout_width="47dp"
-        android:layout_height="51dp"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
         android:layout_alignParentEnd="true"
-        android:layout_alignParentBottom="true"
-        android:background="@color/light_grey"
+        android:layout_marginTop="420dp"
+        android:layout_marginEnd="6dp"
+        android:background="@color/fui_transparent"
         android:enabled="true"
         android:scaleType="fitXY"
         android:src="@drawable/swap_camera"
-        android:visibility="visible"
-        tools:layout_editor_absoluteX="296dp"
-        tools:layout_editor_absoluteY="573dp" />
+        android:visibility="visible" />
 
 
 </RelativeLayout>

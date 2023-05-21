@@ -31,6 +31,7 @@ class Home:Fragment() {
     private lateinit var n_jumps:TextView
     private lateinit var day_streak:TextView
     private lateinit var jumps_day_chart:LineChart
+    private lateinit var time_day_chart:LineChart
     private lateinit var calories_day_chart:LineChart
 
 
@@ -66,6 +67,7 @@ class Home:Fragment() {
         logout_btn = activity.findViewById(R.id.logout_btn)
         n_jumps = activity.findViewById(R.id.njumps)
         jumps_day_chart = activity.findViewById(R.id.jumps_day_chart)
+        time_day_chart = activity.findViewById(R.id.time_day_chart)
         calories_day_chart = activity.findViewById(R.id.calories_day_chart)
         day_streak = activity.findViewById(R.id.nstreakdays)
 
@@ -94,12 +96,13 @@ class Home:Fragment() {
 
             val list_jumps:ArrayList<Entry> = ArrayList()
             val list_calories:ArrayList<Entry> = ArrayList()
-            var x1 = 0F
-            var x2 = 0F
+            val list_time:ArrayList<Entry> = ArrayList()
+            var x = 0F
+
             // Create plot points
             for(date in sorted_daily_reps_count){
                 //Log.d(TAG,"${date.key}")
-                list_jumps.add(Entry(x1,date.value.toFloat()))
+                list_jumps.add(Entry(x,date.value.toFloat()))
                 if(daily_reps_time.contains(date.key)){
                     val values = daily_reps_time[date.key]
                     if(values!= null) {
@@ -107,11 +110,14 @@ class Home:Fragment() {
                         val weight = values["weight"] as Float
                         val height = values["height"] as Float
                         val burned = calculate_burned_calories(duration,weight, height,MET)
-                        list_calories.add(Entry(x2, burned))
-                        x2 += 1
+                        list_calories.add(Entry(x, burned))
+                        list_time.add(Entry(x, (duration/60).toFloat()))
                     }
+                }else{
+                    list_calories.add(Entry(x, 0f))
+                    list_time.add(Entry(x, 0f))
                 }
-                x1 += 1
+                x += 1
             }
             val lineDataSet1 = LineDataSet(list_jumps.toList(),"list")
             lineDataSet1.setColors(ColorTemplate.MATERIAL_COLORS,255)
@@ -127,6 +133,13 @@ class Home:Fragment() {
             calories_day_chart.data = lineData2
             calories_day_chart.description.text = "calories chart"
 
+            val lineDataSet3 = LineDataSet(list_calories.toList(),"list")
+            lineDataSet3.setColors(ColorTemplate.MATERIAL_COLORS,255)
+            lineDataSet3.valueTextColor= Color.BLACK
+            val lineData3 = LineData(lineDataSet3)
+            time_day_chart.data = lineData3
+            time_day_chart.description.text = "time chart"
+
             activity.runOnUiThread {
                 n_jumps.text = stats["total_reps"].toString()
                 day_streak.text = stats["streak"].toString()
@@ -137,6 +150,9 @@ class Home:Fragment() {
 
                 calories_day_chart.notifyDataSetChanged()
                 calories_day_chart.invalidate()
+
+                time_day_chart.notifyDataSetChanged()
+                time_day_chart.invalidate()
 
                 Log.d(TAG,"Done with stats")
 

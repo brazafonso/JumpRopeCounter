@@ -116,6 +116,21 @@ class MainActivity : AppCompatActivity() {
     }
 
 
+    override fun onResume() {
+        super.onResume()
+        Log.d(TAG,"Restarting")
+
+        val u = FirebaseAuth.getInstance().currentUser
+        if(u!=null){
+            Log.d(TAG,"Logged User")
+            get_user(u)
+            go_hub_activity()
+        }else{
+            Log.d(TAG,"User not logged")
+            enable_logout(false)
+            enable_login(true)
+        }
+    }
 
     override fun onRestart() {
         super.onRestart()
