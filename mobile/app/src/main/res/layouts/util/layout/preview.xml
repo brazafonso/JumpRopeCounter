@@ -14,17 +14,19 @@
 
     <Spinner
         android:id="@+id/camera_timer"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
+        android:layout_width="45dp"
+        android:layout_height="35dp"
         android:layout_alignParentStart="true"
-        android:layout_marginStart="85dp"
-        android:layout_marginTop="450dp"
+        android:layout_marginStart="50dp"
+        android:layout_marginTop="430dp"
+        android:background="@color/light_background_color"
+        android:spinnerMode="dropdown"
         android:visibility="visible" />
 
     <androidx.appcompat.widget.AppCompatToggleButton
         android:id="@+id/btn_camera"
         android:layout_width="wrap_content"
-        android:layout_height="50dp"
+        android:layout_height="55dp"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="430dp"
         android:checked="false"
@@ -43,6 +45,16 @@
         android:scaleType="fitXY"
         android:src="@drawable/swap_camera"
         android:visibility="visible" />
+
+    <TextView
+        android:id="@+id/timer_countdown"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="250dp"
+        android:text="None"
+        android:textSize="50sp"
+        android:visibility="invisible"/>
 
 
 </RelativeLayout>

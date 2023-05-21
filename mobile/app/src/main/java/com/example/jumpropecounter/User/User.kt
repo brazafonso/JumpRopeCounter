@@ -38,13 +38,31 @@ class User (user_id:String,username:String?,email:String?):Parcelable{
         update_user_data()
     }
 
+    /**
+     * Checks if user is signed in
+     */
+    fun is_signed_in(): Boolean {
+        var signed_in = false
+        val u = FirebaseAuth.getInstance().currentUser
+        if (u != null) {
+            signed_in = user_id == u.uid
+        }
+        return  signed_in
+    }
+
 
     /**
      * Signs out current user (using firebase authenticate)
      */
     fun sign_out(){
-        if(FirebaseAuth.getInstance().currentUser != null)
+        if(FirebaseAuth.getInstance().currentUser != null) {
             FirebaseAuth.getInstance().signOut()
+            while (is_signed_in()) {
+                Log.d(TAG,"Still logged")
+                Thread.sleep(1 * 1000)
+            }
+        }
+
     }
 
     /**
