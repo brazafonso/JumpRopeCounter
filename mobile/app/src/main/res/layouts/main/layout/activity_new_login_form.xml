@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="@color/white"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="25dp"
+        android:src="@drawable/icon_resized"/>
+
+    <TextView
+        android:id="@+id/login_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/black"
+        android:layout_marginTop="200dp"
+        android:textAlignment="center"
+        android:layout_centerHorizontal="true"
+        android:fontFamily="@font/open_sans_bold"
+        android:text="Fill the info fields"
+        android:textSize="28sp" />
+
+    <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/username"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:background="@color/primary_button"
+        android:layout_marginTop="275dp"
+        android:textColorHint="@color/text"
+        android:fontFamily="@font/open_sans_bold"
+        android:hint="Username"
+        android:layout_centerHorizontal="true"/>
+
+    <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/age"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingVertical="10dp"
+        android:paddingHorizontal="35dp"
+        android:background="@color/primary_button"
+        android:layout_marginTop="350dp"
+        android:textColorHint="@color/text"
+        android:fontFamily="@font/open_sans_bold"
+        android:hint="Age"
+        android:layout_centerHorizontal="true"/>
+
+    <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/weight"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingVertical="10dp"
+        android:paddingHorizontal="20dp"
+        android:background="@color/primary_button"
+        android:layout_marginTop="425dp"
+        android:textColorHint="@color/text"
+        android:fontFamily="@font/open_sans_bold"
+        android:hint="Weight"
+        android:layout_centerHorizontal="true"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="432dp"
+        android:textAlignment="center"
+        android:layout_centerHorizontal="true"
+        android:fontFamily="@font/open_sans_bold"
+        android:layout_toRightOf="@+id/weight"
+        android:layout_marginLeft="10dp"
+        android:text="kg"
+        android:textSize="22sp"/>
+
+    <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/height"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingVertical="10dp"
+        android:paddingHorizontal="20dp"
+        android:background="@color/primary_button"
+        android:layout_marginTop="500dp"
+        android:textColorHint="@color/text"
+        android:fontFamily="@font/open_sans_bold"
+        android:hint="Height"
+        android:layout_centerHorizontal="true"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="508dp"
+        android:textAlignment="center"
+        android:layout_centerHorizontal="true"
+        android:fontFamily="@font/open_sans_bold"
+        android:layout_toRightOf="@+id/weight"
+        android:layout_marginLeft="10dp"
+        android:text="cm"
+        android:textSize="22sp"/>
+
+    <Button
+        android:id="@+id/submit_data"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/primary_button"
+        android:layout_marginTop="600dp"
+        android:padding="15dp"
+        android:fontFamily="@font/open_sans_bold"
+        android:text="Submit"
+        android:layout_centerHorizontal="true"/>
+
+</RelativeLayout>

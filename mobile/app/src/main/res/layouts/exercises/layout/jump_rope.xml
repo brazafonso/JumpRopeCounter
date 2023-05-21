@@ -2,78 +2,101 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/light_background_color">
 
-    <TextView
-        android:id="@+id/TextViewJumpRope"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/header"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginStart="76dp"
-        android:layout_marginTop="33dp"
-        android:text="Jump Rope Counter"
-        android:textSize="30sp"
-        tools:layout_editor_absoluteX="72dp"
-        tools:layout_editor_absoluteY="47dp" />
+        android:orientation="vertical"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:background="@color/light_background_color">
 
+        <TextView
+            android:id="@+id/TextViewJumpRope"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:gravity="center"
+            android:text="Jump Rope Counter"
+            android:fontFamily="@font/open_sans_bold"
+            android:textColor="@color/text"
+            android:textSize="38sp" />
 
-    <TextView
-        android:id="@+id/TextViewJumpRopeCounterDesc"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginStart="9dp"
-        android:layout_marginTop="139dp"
-        android:text="Number of Jumps:"
-        android:textSize="25sp" />
+        <LinearLayout
+            android:id="@+id/line1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="20dp">
 
-    <TextView
-        android:id="@+id/TextViewJumpRopeCounter"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginStart="233dp"
-        android:layout_marginTop="139dp"
-        android:text="0"
-        android:textSize="25sp" />
+            <TextView
+                android:id="@+id/TextViewJumpRopeCounterDesc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Number of Jumps:"
+                android:fontFamily="@font/open_sans_bold"
+                android:textColor="@color/text"
+                android:textSize="32sp" />
 
-    <TextView
-        android:id="@+id/TextViewJumpRopeTimeDesc"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginStart="9dp"
-        android:layout_marginTop="180dp"
-        android:text="Elapsed Time:"
-        android:textSize="25sp" />
+            <TextView
+                android:id="@+id/TextViewJumpRopeCounter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="15dp"
+                android:text="0"
+                android:fontFamily="@font/open_sans_bold"
+                android:textColor="@color/text"
+                android:textSize="35sp" />
 
-    <TextView
-        android:id="@+id/TextViewJumpRopeTime"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginStart="233dp"
-        android:layout_marginTop="180dp"
-        android:text="0 s"
-        android:textSize="25sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/line2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="20dp"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/TextViewJumpRopeTimeDesc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Elapsed Time:"
+                android:fontFamily="@font/open_sans_bold"
+                android:textColor="@color/text"
+                android:textSize="32sp" />
+
+            <TextView
+                android:id="@+id/TextViewJumpRopeTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="15dp"
+                android:text="0 s"
+                android:fontFamily="@font/open_sans_bold"
+                android:textColor="@color/text"
+                android:textSize="35sp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
 
     <FrameLayout
         android:id="@+id/JumpRopeCameraPreview"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/light_grey"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
-        android:layout_marginStart="37dp"
-        android:layout_marginEnd="37dp"
-        android:layout_marginTop="300dp"
-        android:layout_marginBottom="10dp">
-
+        android:layout_marginTop="260dp"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginBottom="80dp">
     </FrameLayout>
 
 </RelativeLayout>
