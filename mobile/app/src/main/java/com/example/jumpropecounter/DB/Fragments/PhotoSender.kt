@@ -1,26 +1,12 @@
 package com.example.jumpropecounter.DB.Fragments
 
-import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.ImageFormat
-import android.graphics.Rect
-import android.graphics.YuvImage
-import android.graphics.drawable.BitmapDrawable
-import android.media.Image
-import android.media.MediaMetadataRetriever
-import android.media.MediaMetadataRetriever.METADATA_KEY_VIDEO_FRAME_COUNT
 import android.util.Log
-import com.example.jumpropecounter.Camera.ImageUtils
 import com.example.jumpropecounter.Utils.ConcurrentFifo
 import com.example.jumpropecounter.Utils.Frame
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
-import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
-import java.nio.file.Files
-import java.nio.file.Path
-import kotlin.io.path.*
-import kotlin.random.Random
 
 
 /**

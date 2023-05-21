@@ -1,18 +1,13 @@
 package com.example.jumpropecounter.Exercise
 
 import android.os.Bundle
-import android.os.PersistableBundle
 import android.util.Log
-import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.example.jumpropecounter.Camera.Preview
-import com.example.jumpropecounter.Hub.Fragments.Home
+import com.example.jumpropecounter.JUMP_TYPE_ACTIVITY
 import com.example.jumpropecounter.R
-import com.example.jumpropecounter.User.Session
-import com.example.jumpropecounter.User.User
-import java.util.ArrayList
 import kotlin.properties.Delegates
 
 class JumpRope: AppCompatActivity() {
@@ -54,7 +49,8 @@ class JumpRope: AppCompatActivity() {
         counter_thread.start()
 
         if(recordingFolder!=null) {
-            val preview_fragment = Preview.newInstance(framerate, recordingFolder, mode)
+            Log.d(TAG,"Type : $JUMP_TYPE_ACTIVITY")
+            val preview_fragment = Preview.newInstance(framerate, recordingFolder,JUMP_TYPE_ACTIVITY, mode)
             // setup observer for activity counter
             preview_fragment.counter_refreshListListeners.add(
                 object : Preview.InterfaceRefreshList {

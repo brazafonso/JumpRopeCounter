@@ -3,7 +3,6 @@ package com.example.jumpropecounter.Camera
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
-import android.graphics.BitmapFactory
 import android.graphics.ImageFormat
 import android.graphics.SurfaceTexture
 import android.hardware.camera2.*
@@ -11,12 +10,9 @@ import android.media.*
 import android.os.Bundle
 import android.os.Handler
 import android.os.HandlerThread
-import android.os.ParcelFileDescriptor
 import android.util.Log
-import android.util.SparseIntArray
 import android.view.*
 import android.widget.ImageButton
-import android.widget.TextView
 import androidx.appcompat.widget.AppCompatToggleButton
 import androidx.fragment.app.Fragment
 import com.example.jumpropecounter.DB.Fragments.PhotoSender
@@ -27,9 +23,7 @@ import com.example.jumpropecounter.Utils.ConcurrentFifo
 import com.example.jumpropecounter.Utils.Frame
 import com.google.firebase.auth.FirebaseAuth
 import java.io.File
-import java.io.FileOutputStream
 import java.nio.file.Path
-import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.io.path.*
 import kotlin.properties.Delegates
@@ -37,6 +31,7 @@ import kotlin.properties.Delegates
 class Preview: Fragment(R.layout.preview) {
     // Default values for capture
     private val TAG = "preview"
+    private lateinit var type_activity:String
     private val MAX_PREVIEW_WIDTH = 320
     private val MAX_PREVIEW_HEIGHT = 240
     private var FRAME_WIDTH = 320
@@ -89,11 +84,12 @@ class Preview: Fragment(R.layout.preview) {
 
 
     companion object {
-        fun newInstance(frameRate:Int,video_storage:String?,mode:Int):Preview{
+        fun newInstance(frameRate:Int,video_storage:String?,type_activity:String?,mode:Int):Preview{
             val fragment = Preview()
             val args = Bundle()
             args.putInt("FRAMERATE",frameRate)
             args.putString("video_storage",video_storage)
+            args.putString("type_activity",type_activity)
             args.putInt("mode",mode)
             fragment.arguments = args
             return fragment
@@ -143,11 +139,13 @@ class Preview: Fragment(R.layout.preview) {
             Log.d(TAG,"Got Bundle")
             FRAMERATE = requireArguments().getInt("FRAMERATE")
             video_storage = requireArguments().getString("video_storage")?.let { Path(it) }!!
+            type_activity = requireArguments().getString("type_activity")?:""
             MODE = requireArguments().getInt("mode")
             min_capture_rest = (1/FRAMERATE * 1000).toLong()
         }
         Log.d(TAG,"Framerate of $FRAMERATE")
         Log.d(TAG,"VideoStorage at $video_storage")
+        Log.d(TAG,"Type activity $type_activity")
 
     }
 
@@ -242,7 +240,8 @@ class Preview: Fragment(R.layout.preview) {
     private fun start_counter(){
         // if user available will create a session to save results
         if(user!=null) {
-            session = Session(user!!.uid)
+            session = Session(user!!.uid,type_activity)
+            session!!.update_with_user_date()
             // updates total reps value with session counter
             session!!.counter_refreshListListeners.add(object : Session.InterfaceRefreshList {
                 override fun refreshListRequest() {

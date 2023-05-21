@@ -7,22 +7,32 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import androidx.appcompat.app.AppCompatActivity
+import android.widget.TextView
 import androidx.fragment.app.Fragment
-import com.example.jumpropecounter.Camera.Preview
+import androidx.fragment.app.FragmentActivity
+import com.example.jumpropecounter.JUMP_TYPE_ACTIVITY
 import com.example.jumpropecounter.R
 import com.example.jumpropecounter.User.User
-import com.github.mikephil.charting.charts.BarChart
-import com.github.mikephil.charting.data.BarData
-import com.github.mikephil.charting.data.BarDataSet
-import com.github.mikephil.charting.data.BarEntry
+import com.github.mikephil.charting.charts.LineChart
+import com.github.mikephil.charting.data.Entry
+import com.github.mikephil.charting.data.LineData
+import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.utils.ColorTemplate
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+
 
 class Home:Fragment() {
     var TAG = "Home"
-    lateinit var user:User
-    lateinit var logout_btn:Button
-    lateinit var jumps_day_chart:BarChart
+    private lateinit var activity: FragmentActivity
+    private lateinit var user:User
+    private lateinit var logout_btn:Button
+    private lateinit var n_jumps:TextView
+    private lateinit var day_streak:TextView
+    private lateinit var jumps_day_chart:LineChart
+    private lateinit var calories_day_chart:LineChart
+
 
     companion object {
         fun newInstance(u: User): Home {
@@ -46,15 +56,18 @@ class Home:Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         user = requireArguments().getParcelable("user")!!
+        activity = requireActivity()
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
 
-        logout_btn = requireActivity().findViewById(R.id.logout_btn)
-
-        jumps_day_chart = requireActivity().findViewById(R.id.jumps_day_chart)
+        logout_btn = activity.findViewById(R.id.logout_btn)
+        n_jumps = activity.findViewById(R.id.njumps)
+        jumps_day_chart = activity.findViewById(R.id.jumps_day_chart)
+        calories_day_chart = activity.findViewById(R.id.calories_day_chart)
+        day_streak = activity.findViewById(R.id.nstreakdays)
 
         logout_btn.setOnClickListener { _ ->
             Log.d(TAG,"Logout button")
@@ -62,31 +75,83 @@ class Home:Fragment() {
             requireActivity().finish()
         }
 
-
-
-
-
-        val list:ArrayList<BarEntry> = ArrayList()
-        list.add(BarEntry(100f,100f,"Monday"))
-        list.add(BarEntry(101f,101f,"Tuesday"))
-        list.add(BarEntry(102f,102f,"Wednesday"))
-        list.add(BarEntry(103f,103f,"Thursday"))
-        list.add(BarEntry(104f,104f,"Friday"))
-
-        val barDataSet = BarDataSet(list,"list")
-
-        barDataSet.setColors(ColorTemplate.MATERIAL_COLORS,255)
-        barDataSet.valueTextColor= Color.BLACK
-
-        val barData = BarData(barDataSet)
-
-        jumps_day_chart.data = barData
-
-        jumps_day_chart.description.text = "bar chart"
-
-
+        update_stats()
     }
 
+    /**
+     * Func that gathers information about the users sessions and updates view accordingly
+     */
+    fun update_stats(){
+        CoroutineScope(Dispatchers.IO).launch {
+            val sessions = user.get_sessions()
+            val stats = user.get_stats(sessions, JUMP_TYPE_ACTIVITY)
+            val MET = 8.8F
 
+            // Feed daily jumps graph
+            val daily_reps_count = stats["daily_reps_count"] as LinkedHashMap<String,Int>
+            val sorted_daily_reps_count = daily_reps_count.toSortedMap()
+            val daily_reps_time = stats["daily_reps_time"] as LinkedHashMap<String,Map<String,Any>>
+
+            val list_jumps:ArrayList<Entry> = ArrayList()
+            val list_calories:ArrayList<Entry> = ArrayList()
+            var x1 = 0F
+            var x2 = 0F
+            // Create plot points
+            for(date in sorted_daily_reps_count){
+                //Log.d(TAG,"${date.key}")
+                list_jumps.add(Entry(x1,date.value.toFloat()))
+                if(daily_reps_time.contains(date.key)){
+                    val values = daily_reps_time[date.key]
+                    if(values!= null) {
+                        val duration = values["duration"] as Long
+                        val weight = values["weight"] as Float
+                        val height = values["height"] as Float
+                        val burned = calculate_burned_calories(duration,weight, height,MET)
+                        list_calories.add(Entry(x2, burned))
+                        x2 += 1
+                    }
+                }
+                x1 += 1
+            }
+            val lineDataSet1 = LineDataSet(list_jumps.toList(),"list")
+            lineDataSet1.setColors(ColorTemplate.MATERIAL_COLORS,255)
+            lineDataSet1.valueTextColor= Color.BLACK
+            val lineData1 = LineData(lineDataSet1)
+            jumps_day_chart.data = lineData1
+            jumps_day_chart.description.text = "jumps chart"
+
+            val lineDataSet2 = LineDataSet(list_calories.toList(),"list")
+            lineDataSet2.setColors(ColorTemplate.MATERIAL_COLORS,255)
+            lineDataSet2.valueTextColor= Color.BLACK
+            val lineData2 = LineData(lineDataSet2)
+            calories_day_chart.data = lineData2
+            calories_day_chart.description.text = "calories chart"
+
+            activity.runOnUiThread {
+                n_jumps.text = stats["total_reps"].toString()
+                day_streak.text = stats["streak"].toString()
+
+                // refresh chart
+                jumps_day_chart.notifyDataSetChanged()
+                jumps_day_chart.invalidate()
+
+                calories_day_chart.notifyDataSetChanged()
+                calories_day_chart.invalidate()
+
+                Log.d(TAG,"Done with stats")
+
+
+            }
+        }
+    }
+
+    /**
+     * Calculates burned calories, acording to exercise and height and weight of the user
+     */
+    private fun calculate_burned_calories(seconds:Long,weight:Float,height:Float,met:Float): Float {
+        val burned = (((met * weight * 3.5) / 200) / 60) * seconds
+        Log.d(TAG,"Burned $burned in $seconds seconds")
+        return burned.toFloat()
+    }
 
 }

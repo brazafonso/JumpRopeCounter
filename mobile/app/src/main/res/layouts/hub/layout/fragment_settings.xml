@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background_color">
@@ -14,10 +13,10 @@
         android:src="@drawable/coach"/>
 
     <TextView
-        android:id="@+id/hello_user"
+        android:id="@+id/settings_username"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello User!"
+        android:text="Username"
         android:layout_marginTop="175dp"
         android:layout_centerHorizontal="true"
         android:fontFamily="@font/open_sans_bold"
@@ -36,25 +35,36 @@
         android:text="Change Icon"
         android:layout_centerHorizontal="true"/>
 
-    <Button
+    <com.google.android.material.textfield.TextInputEditText
         android:id="@+id/change_u"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:backgroundTint="@color/primary_button"
         android:layout_marginTop="325dp"
         android:fontFamily="@font/open_sans_bold"
-        android:text="Change Username"
+        android:hint="Change Username"
         android:layout_centerHorizontal="true"/>
 
+    <ImageButton
+        android:id="@+id/change_u_confirm"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="320dp"
+        android:layout_marginTop="329dp"
+        android:backgroundTint="@color/primary_button"
+        android:fontFamily="@font/open_sans_bold"
+        android:paddingHorizontal="28dp"
+        android:src="@drawable/check_icon" />
+
     <Button
-        android:id="@+id/delete_data"
+        android:id="@+id/reset_data"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:backgroundTint="@color/primary_button"
         android:layout_marginTop="400dp"
         android:paddingHorizontal="28dp"
         android:fontFamily="@font/open_sans_bold"
-        android:text="Delete All Data"
+        android:text="Reset Stats"
         android:layout_centerHorizontal="true"/>
 
 
