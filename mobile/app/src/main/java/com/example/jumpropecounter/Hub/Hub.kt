@@ -16,8 +16,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class Hub : AppCompatActivity() {
     private var TAG = "Hub"
-    lateinit var user: User
-    private lateinit var logout_btn: Button
+    private lateinit var user: User
 
 
 
@@ -26,8 +25,9 @@ class Hub : AppCompatActivity() {
         Log.d(TAG, "On Hub Activity")
 
         user = intent.getParcelableExtra(EXTRA_USER)!!
+        Log.d(TAG, "User ${user.username} ${user.age} ${user.weight} ${user.height}")
         if(user.is_signed_in()) {
-            Log.d(TAG, "User ${user.username}")
+            Log.d(TAG, "User ${user.username} ${user.age} ${user.weight} ${user.height}")
 
             setContentView(R.layout.navbar_agregator)
 

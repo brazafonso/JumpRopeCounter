@@ -1,8 +1,10 @@
 package com.example.jumpropecounter.User
 
+import android.content.Context
 import android.os.Parcel
 import android.os.Parcelable
 import android.util.Log
+import com.firebase.ui.auth.AuthUI
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
@@ -10,6 +12,7 @@ import kotlinx.coroutines.tasks.await
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
+import kotlin.coroutines.coroutineContext
 
 const val DB_USER_PATH = "users"
 
@@ -28,6 +31,7 @@ class User (user_id:String,username:String?,email:String?):Parcelable{
     var total_jumps = 0
     var permission_level = 0
     var created = System.currentTimeMillis()
+
 
 
     /**
@@ -80,15 +84,9 @@ class User (user_id:String,username:String?,email:String?):Parcelable{
     /**
      * Signs out current user (using firebase authenticate)
      */
-    fun sign_out(){
-        if(FirebaseAuth.getInstance().currentUser != null) {
-            FirebaseAuth.getInstance().signOut()
-            while (is_signed_in()) {
-                Log.d(TAG,"Still logged")
-                Thread.sleep(1 * 1000)
-            }
-        }
-
+    suspend fun sign_out(context: Context){
+        val result = AuthUI.getInstance().signOut(context).await()
+        Log.d(TAG,"result: $result")
     }
 
     /**
@@ -316,23 +314,28 @@ class User (user_id:String,username:String?,email:String?):Parcelable{
     }
 
 
-
     constructor(parcel: Parcel) : this(
-        parcel.readString().toString(),
-        parcel.readString(),
-        parcel.readString()
+        user_id = parcel.readString().toString(),
+        username = parcel.readString(),
+        email = parcel.readString(),
     ) {
+        weight = parcel.readFloat()
+        height = parcel.readFloat()
+        age = parcel.readInt()
+        total_jumps = parcel.readInt()
+        permission_level = parcel.readInt()
+        created = parcel.readLong()
     }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(user_id)
         parcel.writeString(username)
+        parcel.writeString(email)
         parcel.writeFloat(weight)
         parcel.writeFloat(height)
         parcel.writeInt(age)
-        parcel.writeLong(created)
-        parcel.writeString(email)
         parcel.writeInt(total_jumps)
+        parcel.writeInt(permission_level)
         parcel.writeLong(created)
     }
 

@@ -8,12 +8,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import com.example.jumpropecounter.JUMP_TYPE_ACTIVITY
 import com.example.jumpropecounter.R
 import com.example.jumpropecounter.User.User
+import com.firebase.ui.auth.AuthUI
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
@@ -88,8 +90,10 @@ class Home:Fragment() {
 
         logout_btn.setOnClickListener { _ ->
             Log.d(TAG,"Logout button")
-            user.sign_out()
-            activity.finish()
+            CoroutineScope(Dispatchers.IO).launch {
+                user.sign_out(requireContext())
+                activity.finish()
+            }
         }
 
     }

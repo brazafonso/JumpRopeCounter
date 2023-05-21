@@ -146,7 +146,7 @@ class Settings : Fragment() {
      * Updates the page with users data
      */
     private fun update_page(){
-        Log.d(TAG,"User ${user.username} ${user.email}")
+        Log.d(TAG,"User ${user.username} ${user.email} ${user.age} ${user.height} ${user.weight}")
         username.text = user.username
         change_username.hint = user.username
         change_age.hint = user.age.toString()

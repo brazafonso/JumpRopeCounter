@@ -66,10 +66,14 @@ class MainActivity : AppCompatActivity() {
             if(u!=null){
                 Log.d(TAG,"Logged User")
                 CoroutineScope(Dispatchers.IO).launch {
+                    Log.d(TAG,"Geting user information")
                     val exists = get_user(u!!)
+                    Log.d(TAG,"Got user information")
                     if(!exists){
+                        Log.d(TAG,"Creating user")
                         go_create_user_activity()
                     }else {
+                        Log.d(TAG,"Going to hub ${user!!.username} ${user!!.age}")
                         go_hub_activity()
                     }
                 }
@@ -140,7 +144,7 @@ class MainActivity : AppCompatActivity() {
         user = User(u.uid,u.displayName,u.email)
         val exists = user!!.exists_user()
         user!!.get_user_data()
-        Log.d(TAG, "User ${user!!.username}")
+        Log.d(TAG, "User ${user!!.username} ${user!!.age} ${user!!.weight} ${user!!.height}")
         return exists
     }
 
