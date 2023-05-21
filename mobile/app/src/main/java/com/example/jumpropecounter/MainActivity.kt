@@ -194,7 +194,10 @@ class MainActivity : AppCompatActivity() {
      * Gets and updates firebase user
      */
     fun get_user(u:FirebaseUser){
-        user = User(u.uid,u.displayName!!,u.email)
+        Log.d(TAG, "User ${u.uid}")
+        Log.d(TAG, "User ${u.displayName}")
+        Log.d(TAG, "User ${u.email}")
+        user = User(u.uid,u.displayName,u.email)
         user!!.get_user_data()
         Log.d(TAG, "User ${user!!.username}")
     }

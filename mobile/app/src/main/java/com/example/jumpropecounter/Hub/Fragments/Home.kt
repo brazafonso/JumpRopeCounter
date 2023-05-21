@@ -18,6 +18,7 @@ import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.utils.ColorTemplate
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -62,7 +63,7 @@ class Home:Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-
+        Log.d(TAG,"On home fragment")
 
         logout_btn = activity.findViewById(R.id.logout_btn)
         n_jumps = activity.findViewById(R.id.njumps)
@@ -71,14 +72,17 @@ class Home:Fragment() {
         calories_day_chart = activity.findViewById(R.id.calories_day_chart)
         day_streak = activity.findViewById(R.id.nstreakdays)
 
+
+        update_stats()
+
         logout_btn.setOnClickListener { _ ->
             Log.d(TAG,"Logout button")
             user.sign_out()
-            requireActivity().finish()
+            activity.finish()
         }
 
-        update_stats()
     }
+
 
     /**
      * Func that gathers information about the users sessions and updates view accordingly
@@ -91,55 +95,57 @@ class Home:Fragment() {
 
             // Feed daily jumps graph
             val daily_reps_count = stats["daily_reps_count"] as LinkedHashMap<String,Int>
-            val sorted_daily_reps_count = daily_reps_count.toSortedMap()
             val daily_reps_time = stats["daily_reps_time"] as LinkedHashMap<String,Map<String,Any>>
 
-            val list_jumps:ArrayList<Entry> = ArrayList()
-            val list_calories:ArrayList<Entry> = ArrayList()
-            val list_time:ArrayList<Entry> = ArrayList()
-            var x = 0F
+            if (daily_reps_time.isNotEmpty()) {
+                val sorted_daily_reps_count = daily_reps_count.toSortedMap()
+                val list_jumps: ArrayList<Entry> = ArrayList()
+                val list_calories: ArrayList<Entry> = ArrayList()
+                val list_time: ArrayList<Entry> = ArrayList()
+                var x = 0F
 
-            // Create plot points
-            for(date in sorted_daily_reps_count){
-                //Log.d(TAG,"${date.key}")
-                list_jumps.add(Entry(x,date.value.toFloat()))
-                if(daily_reps_time.contains(date.key)){
-                    val values = daily_reps_time[date.key]
-                    if(values!= null) {
-                        val duration = values["duration"] as Long
-                        val weight = values["weight"] as Float
-                        val height = values["height"] as Float
-                        val burned = calculate_burned_calories(duration,weight, height,MET)
-                        list_calories.add(Entry(x, burned))
-                        list_time.add(Entry(x, (duration/60).toFloat()))
+                // Create plot points
+                for (date in sorted_daily_reps_count) {
+                    list_jumps.add(Entry(x, date.value.toFloat()))
+                    if (daily_reps_time.contains(date.key)) {
+                        val values = daily_reps_time[date.key]
+                        if (values != null) {
+                            val duration = values["duration"] as Long
+                            val weight = values["weight"] as Float
+                            val height = values["height"] as Float
+                            val burned = calculate_burned_calories(duration, weight, height, MET)
+                            list_calories.add(Entry(x, burned))
+                            list_time.add(Entry(x, (duration / 60).toFloat()))
+                        }
+                    } else {
+                        list_calories.add(Entry(x, 0f))
+                        list_time.add(Entry(x, 0f))
                     }
-                }else{
-                    list_calories.add(Entry(x, 0f))
-                    list_time.add(Entry(x, 0f))
+                    x += 1
                 }
-                x += 1
+                val lineDataSet1 = LineDataSet(list_jumps.toList(), "list")
+                lineDataSet1.setColors(ColorTemplate.MATERIAL_COLORS, 255)
+                lineDataSet1.valueTextColor = Color.BLACK
+                val lineData1 = LineData(lineDataSet1)
+                jumps_day_chart.data = lineData1
+                jumps_day_chart.description.text = "jumps chart"
+
+                val lineDataSet2 = LineDataSet(list_calories.toList(), "list")
+                lineDataSet2.setColors(ColorTemplate.MATERIAL_COLORS, 255)
+                lineDataSet2.valueTextColor = Color.BLACK
+                val lineData2 = LineData(lineDataSet2)
+                calories_day_chart.data = lineData2
+                calories_day_chart.description.text = "calories chart"
+
+                val lineDataSet3 = LineDataSet(list_calories.toList(), "list")
+                lineDataSet3.setColors(ColorTemplate.MATERIAL_COLORS, 255)
+                lineDataSet3.valueTextColor = Color.BLACK
+                val lineData3 = LineData(lineDataSet3)
+                time_day_chart.data = lineData3
+                time_day_chart.description.text = "time chart"
             }
-            val lineDataSet1 = LineDataSet(list_jumps.toList(),"list")
-            lineDataSet1.setColors(ColorTemplate.MATERIAL_COLORS,255)
-            lineDataSet1.valueTextColor= Color.BLACK
-            val lineData1 = LineData(lineDataSet1)
-            jumps_day_chart.data = lineData1
-            jumps_day_chart.description.text = "jumps chart"
 
-            val lineDataSet2 = LineDataSet(list_calories.toList(),"list")
-            lineDataSet2.setColors(ColorTemplate.MATERIAL_COLORS,255)
-            lineDataSet2.valueTextColor= Color.BLACK
-            val lineData2 = LineData(lineDataSet2)
-            calories_day_chart.data = lineData2
-            calories_day_chart.description.text = "calories chart"
-
-            val lineDataSet3 = LineDataSet(list_calories.toList(),"list")
-            lineDataSet3.setColors(ColorTemplate.MATERIAL_COLORS,255)
-            lineDataSet3.valueTextColor= Color.BLACK
-            val lineData3 = LineData(lineDataSet3)
-            time_day_chart.data = lineData3
-            time_day_chart.description.text = "time chart"
-
+            // Modify view
             activity.runOnUiThread {
                 n_jumps.text = stats["total_reps"].toString()
                 day_streak.text = stats["streak"].toString()

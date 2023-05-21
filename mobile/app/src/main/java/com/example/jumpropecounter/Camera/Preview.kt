@@ -12,7 +12,9 @@ import android.os.Handler
 import android.os.HandlerThread
 import android.util.Log
 import android.view.*
+import android.widget.ArrayAdapter
 import android.widget.ImageButton
+import android.widget.Spinner
 import androidx.appcompat.widget.AppCompatToggleButton
 import androidx.fragment.app.Fragment
 import com.example.jumpropecounter.DB.Fragments.PhotoSender
@@ -44,6 +46,9 @@ class Preview: Fragment(R.layout.preview) {
     private var framesFifo =  ConcurrentFifo<Frame>() // stack to store frames
     private var current_lens = CameraCharacteristics.LENS_FACING_BACK //default lens
     private var last_capture:Long = 0
+    private lateinit var swap_camera_btn:ImageButton
+    private lateinit var capture_btn:AppCompatToggleButton
+    private lateinit var camera_timer:Spinner
 
     // Setup observable counter for the activities that create this fragment
     var counter_refreshListListeners = ArrayList<InterfaceRefreshList>()
@@ -60,8 +65,6 @@ class Preview: Fragment(R.layout.preview) {
     private lateinit var activity:Activity
     private lateinit var previewTextureView :TextureView
     private lateinit var imageReader: ImageReader
-    private lateinit var swap_camera_btn:ImageButton
-    private lateinit var capture_btn:AppCompatToggleButton
     private lateinit var captureSession: CameraCaptureSession
     private lateinit var captureRequestBuilder: CaptureRequest.Builder
     private lateinit var cameraDevice: CameraDevice
@@ -159,6 +162,10 @@ class Preview: Fragment(R.layout.preview) {
         capture_btn = activity.findViewById(R.id.btn_camera)
         swap_camera_btn = activity.findViewById(R.id.swap_camera)
         previewTextureView = activity.findViewById(R.id.textView)
+        camera_timer = activity.findViewById(R.id.camera_timer)
+
+        prepare_timer()
+
 
         // Capture button
         capture_btn.setOnCheckedChangeListener{ _, isChecked ->
@@ -233,6 +240,17 @@ class Preview: Fragment(R.layout.preview) {
         closeCamera()
         stopBackgroundThread()
     }
+
+
+    /**
+     * Prepares timer spinner
+     */
+    private fun prepare_timer(){
+        val items = arrayOf(0,2,4,6,8,10)
+        val adapter = ArrayAdapter(requireContext(),R.layout.preview,items)
+        camera_timer.adapter = adapter
+    }
+
 
     /**
      * Thread that will analyse the frames and check whether event happened
