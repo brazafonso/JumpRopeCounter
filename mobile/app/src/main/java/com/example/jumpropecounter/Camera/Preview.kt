@@ -7,6 +7,7 @@ import android.graphics.ImageFormat
 import android.graphics.SurfaceTexture
 import android.hardware.camera2.*
 import android.media.*
+import android.opengl.Visibility
 import android.os.Bundle
 import android.os.Handler
 import android.os.HandlerThread
@@ -15,6 +16,7 @@ import android.view.*
 import android.widget.ArrayAdapter
 import android.widget.ImageButton
 import android.widget.Spinner
+import android.widget.TextView
 import androidx.appcompat.widget.AppCompatToggleButton
 import androidx.fragment.app.Fragment
 import com.example.jumpropecounter.DB.Fragments.PhotoSender
@@ -27,6 +29,7 @@ import com.google.firebase.auth.FirebaseAuth
 import java.io.File
 import java.nio.file.Path
 import java.util.*
+import kotlin.concurrent.thread
 import kotlin.io.path.*
 import kotlin.properties.Delegates
 
@@ -41,14 +44,14 @@ class Preview: Fragment(R.layout.preview) {
     private var FRAMERATE = 20
     private var min_capture_rest:Long = (1/FRAMERATE * 1000).toLong() // miliseconds between frame capture
     private var MODE = 0 // operation mode (normal-0 or dev-1), defines if frames are sent to firebase or to ai model
-    private var N_SEQ = 0
-    private var recording = false
     private var framesFifo =  ConcurrentFifo<Frame>() // stack to store frames
     private var current_lens = CameraCharacteristics.LENS_FACING_BACK //default lens
     private var last_capture:Long = 0
     private lateinit var swap_camera_btn:ImageButton
     private lateinit var capture_btn:AppCompatToggleButton
     private lateinit var camera_timer:Spinner
+    private lateinit var timer_countdown:TextView
+    private var recording = false
 
     // Setup observable counter for the activities that create this fragment
     var counter_refreshListListeners = ArrayList<InterfaceRefreshList>()
@@ -57,6 +60,15 @@ class Preview: Fragment(R.layout.preview) {
             it.refreshListRequest()
         }
     }
+
+    // Setup observable frame sequence number for the activities that create this fragment
+    var N_SEQ_refreshListListeners = ArrayList<InterfaceRefreshList>()
+    var N_SEQ:Int by Delegates.observable(0){ property, oldValue, newValue ->
+        N_SEQ_refreshListListeners.forEach {
+            it.refreshListRequest()
+        }
+    }
+
     interface InterfaceRefreshList {
         fun refreshListRequest()
     }
@@ -70,6 +82,7 @@ class Preview: Fragment(R.layout.preview) {
     private lateinit var cameraDevice: CameraDevice
     private lateinit var backgroundThread: HandlerThread
     private lateinit var backgroundHandler: Handler
+    private lateinit var start_thread : Thread
     private val cameraManager by lazy {
         activity.getSystemService(Context.CAMERA_SERVICE) as CameraManager
     }
@@ -163,6 +176,7 @@ class Preview: Fragment(R.layout.preview) {
         swap_camera_btn = activity.findViewById(R.id.swap_camera)
         previewTextureView = activity.findViewById(R.id.textView)
         camera_timer = activity.findViewById(R.id.camera_timer)
+        timer_countdown = activity.findViewById(R.id.timer_countdown)
 
         prepare_timer()
 
@@ -173,20 +187,11 @@ class Preview: Fragment(R.layout.preview) {
                     // Start recording
                     Log.d(TAG,"Capturing video")
                     disable_swap_camera() // Cant change camera during recording
-                    if(MODE==0) // Normal mode (count activity)
-                        start_counter()
-                    else // Dev mode, send frames to storage
-                        start_sender()
-                    recording = true
+                    start_capturing()
                 }
                 else{
                     // Stop recording
-                    recording = false
-                    enable_swap_camera()
-                    if(MODE==0)
-                        stop_counter()
-                    else
-                        stop_sender()
+                    stop_capturing()
                 }
             }
         // Swap camera button
@@ -243,14 +248,125 @@ class Preview: Fragment(R.layout.preview) {
 
 
     /**
+     * Starts capturing, having into account the chosen timer
+     */
+    private fun start_capturing(){
+        disable_timer()
+        disable_capture_btn()
+        var time = camera_timer.selectedItem as String
+        if(time == "No wait") time = "0 s"
+        var time_value = time.split(" ")[0].toInt()
+        update_countdown_timer(time_value.toString())
+        if(time_value > 0)
+            enable_countdown_timer()
+        start_thread = Thread {
+            while(time_value > 0){
+                update_countdown_timer(time_value.toString())
+                Thread.sleep(1000)
+                time_value -= 1
+            }
+            disable_countdown_timer()
+
+            if(MODE==0) // Normal mode (count activity)
+                start_counter()
+            else // Dev mode, send frames to storage
+                start_sender()
+            N_SEQ = 0
+            recording = true
+            enable_capture_btn()
+        }
+        start_thread.start()
+    }
+
+    /**
+     * Stops capturing session
+     */
+    private fun stop_capturing(){
+        recording = false
+        start_thread.interrupt()
+        N_SEQ = 0
+        enable_swap_camera()
+        enable_timer()
+        if(MODE==0)
+            stop_counter()
+        else
+            stop_sender()
+    }
+
+
+    /**
      * Prepares timer spinner
      */
     private fun prepare_timer(){
-        val items = arrayOf(0,2,4,6,8,10)
-        val adapter = ArrayAdapter(requireContext(),R.layout.preview,items)
+        val items = arrayOf("No wait","2 s","4 s","6 s","8 s","10 s")
+        val adapter = ArrayAdapter(requireContext(),R.layout.spinner,items)
         camera_timer.adapter = adapter
     }
 
+
+
+    /**
+     * Updates value of countdown text
+     */
+    fun update_countdown_timer(time_value:String){
+        activity.runOnUiThread {
+            timer_countdown.text = time_value
+        }
+    }
+
+    /**
+     * Enables countdown text
+     */
+    fun enable_countdown_timer(){
+        activity.runOnUiThread {
+            timer_countdown.visibility = View.VISIBLE
+        }
+    }
+
+    /**
+     * Disables countdown text
+     */
+    fun disable_countdown_timer(){
+        activity.runOnUiThread {
+            timer_countdown.visibility = View.INVISIBLE
+        }
+    }
+
+    /**
+     * Enables the camera timer
+     */
+    private fun enable_timer(){
+        activity.runOnUiThread {
+            camera_timer.visibility = View.VISIBLE
+        }
+    }
+
+    /**
+     * Disables the camera timer
+     */
+    private fun disable_timer(){
+        activity.runOnUiThread {
+            camera_timer.visibility = View.INVISIBLE
+        }
+    }
+
+    /**
+     * Enables the capture button
+     */
+    private fun enable_capture_btn(){
+        activity.runOnUiThread {
+            capture_btn.visibility = View.VISIBLE
+        }
+    }
+
+    /**
+     * Disables the capture button
+     */
+    private fun disable_capture_btn(){
+        activity.runOnUiThread {
+            capture_btn.visibility = View.INVISIBLE
+        }
+    }
 
     /**
      * Thread that will analyse the frames and check whether event happened
