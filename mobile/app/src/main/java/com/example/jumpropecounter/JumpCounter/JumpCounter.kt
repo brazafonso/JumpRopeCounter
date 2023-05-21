@@ -49,14 +49,31 @@ class JumpCounter (val concurrentFIFO: ConcurrentFifo<Frame>,session: Session?) 
     {
         Log.d(TAG, "Starting jump counter")
 
-        // TEST ONLY: Load images from assets
-        val img_test_jumping : Bitmap? = loadBitmapFromAssets(getApplicationContext(), "test_jumping.jpg")
-        val img_test_not_jumping : Bitmap? = loadBitmapFromAssets(getApplicationContext(), "test_not_jumping.jpg")
-
-        Log.d(TAG, "Adding test images to FIFO. Is empty: ${this._concurrentFIFO.isEmpty()}")
-        //this._concurrentFIFO.enqueue(Frame(img_test_jumping, 0, isStart = true))
-        //this._concurrentFIFO.enqueue(Frame(img_test_not_jumping, 1, isEnd = true))
-        Log.d(TAG, "Added test images to FIFO. Is empty: ${this._concurrentFIFO.isEmpty()}")
+        // TEST ONLY: Load images from assets/test_images
+        //Log.d(TAG, "Loading images")
+        //val assets = getApplicationContext().assets
+        //val testImages = assets.list("test_images")
+        //var seq_num = 0
+        //if (testImages != null) {
+        //    val sortedImages = testImages.sortedWith(compareBy { it.substringBefore("_").toIntOrNull() }) // Sort the array based on the initial number
+        //    for (image in sortedImages) {
+        //        val bitmap = loadBitmapFromAssets(getApplicationContext(), "test_images/$image")
+        //        var isStart = false
+        //        var isEnd = false
+//
+        //        if (image == sortedImages.first())
+        //        {
+        //            isStart = true
+        //        }
+        //        else if (image == sortedImages.last())
+        //        {
+        //            isEnd = true
+        //        }
+        //        val frame = Frame(bitmap, seq_num, isStart, isEnd)
+        //        _concurrentFIFO.enqueue(frame)
+        //        seq_num++
+        //    }
+        //}
 
         var module : Module? = null
         try {
@@ -73,7 +90,7 @@ class JumpCounter (val concurrentFIFO: ConcurrentFifo<Frame>,session: Session?) 
         // Start jump counter
         if (module != null)
         {
-            Log.d(TAG, "Starting jump counter")
+            Log.d(TAG, "Jump counter running")
             jumpCounter(module)
         }
     }
@@ -83,12 +100,16 @@ class JumpCounter (val concurrentFIFO: ConcurrentFifo<Frame>,session: Session?) 
         // List of jump/non-jump frames. True = jump, False = non-jump
         val jumpList = mutableListOf<Boolean>()
 
+        // Count previous jump
+        var previousJumpCount = 0
+
         while (true)
         {
             if (!_concurrentFIFO.isEmpty()) {
                 val frame = _concurrentFIFO.dequeue()
                 if (frame.is_start())
                 {
+                    Log.d(TAG, "Start frame")
                     this._jumpCount = 0
                     jumpList.clear()
                 }
@@ -101,13 +122,20 @@ class JumpCounter (val concurrentFIFO: ConcurrentFifo<Frame>,session: Session?) 
                     // Check if we add a jump to the counter
                     if(jumping)
                     {
-                        if (jumpList.isEmpty() or (!jumpList.isEmpty() && !jumpList.last()))
+                        previousJumpCount++
+                        if (jumpList.isEmpty() or (previousJumpCount == 1 && jumpList.isNotEmpty()))
                         {
                             this._jumpCount++
+                            Log.d(TAG, "Jump count: ${this._jumpCount}")
                             if (session!=null)
                                 session.total_reps++
                         }
                     }
+                    else
+                    {
+                        previousJumpCount = 0
+                    }
+
                     jumpList.add(jumping)
                 }
 

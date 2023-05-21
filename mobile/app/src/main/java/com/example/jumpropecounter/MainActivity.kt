@@ -13,8 +13,11 @@ import com.example.jumpropecounter.Camera.Preview
 import com.example.jumpropecounter.DB.Fragments.PhotoSender
 import com.example.jumpropecounter.Exercise.JumpRope
 import com.example.jumpropecounter.Hub.Hub
+import com.example.jumpropecounter.JumpCounter.JumpCounter
 import com.example.jumpropecounter.User.User
 import com.example.jumpropecounter.User.activity.LoginUserActivity
+import com.example.jumpropecounter.Utils.ConcurrentFifo
+import com.example.jumpropecounter.Utils.Frame
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 
@@ -58,6 +61,11 @@ class MainActivity : AppCompatActivity() {
 
         // Get permissions
         get_permissions()
+
+        // If want to test the jump counter without the camera
+        //val framesFifo =  ConcurrentFifo<Frame>() // stack to store frames
+        //val counter = JumpCounter(framesFifo, null)
+        //counter.start()
 
         go_capture_btn = findViewById(R.id.go_capture_btn)
         login_btn = findViewById(R.id.login_btn)
