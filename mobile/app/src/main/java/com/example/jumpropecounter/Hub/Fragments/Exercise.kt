@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import com.example.jumpropecounter.Exercise.JumpRope
 import com.example.jumpropecounter.R
@@ -14,6 +15,16 @@ import com.example.jumpropecounter.R
 
 class Exercise : Fragment() {
     val TAG = "Exercise Fragment"
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        requireActivity().onBackPressedDispatcher.addCallback(this,
+            object : OnBackPressedCallback(false){
+                override fun handleOnBackPressed() {
+                    Log.d(TAG,"BackPress")
+                }
+            })
+    }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -33,6 +44,8 @@ class Exercise : Fragment() {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_exercise, container, false)
     }
+
+
 
     companion object {
 

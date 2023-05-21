@@ -203,23 +203,22 @@ class User (user_id:String,username:String?,email:String?):Parcelable{
      * Gets a user from the firebase realtime database
      * Creates it if he doesnt exist
      */
-    fun get_user_data(){
+     suspend fun get_user_data(){
         val db_users_reference = Firebase.database.reference.child("$DB_USER_PATH/$user_id")
-        db_users_reference.get()
-            .addOnSuccessListener {
-                Log.d(TAG,"Got user data")
-                // user exists
-                if(it.value != null) {
-                    update_from_map(it.value)
-                }
-                // user doesnt exist
-                else{
-                    create_user_data()
+        val result = db_users_reference.get().await()
+        if(result.exists()){
+            Log.d(TAG,"Got user data")
+            // user exists
+            if(result.value != null) {
+                update_from_map(result.value)
             }
+            // user doesnt exist
+            else{
+                create_user_data()
+            }
+        }else{
+            Log.d(TAG,"Error getting user")
         }
-            .addOnFailureListener {
-                Log.d(TAG,"Error getting user")
-            }
     }
 
 
@@ -246,6 +245,7 @@ class User (user_id:String,username:String?,email:String?):Parcelable{
      */
     fun update_from_map(value: Any?) {
         val map = value as Map<*, *>
+        Log.d(TAG,"Got user $map")
         username = map["username"].toString()
         email = map["email"].toString()
         weight = map["weight"].toString().toFloat()

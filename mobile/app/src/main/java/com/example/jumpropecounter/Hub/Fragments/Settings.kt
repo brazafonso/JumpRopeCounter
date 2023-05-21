@@ -10,6 +10,7 @@ import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import com.example.jumpropecounter.R
@@ -49,11 +50,17 @@ class Settings : Fragment() {
         super.onCreate(savedInstanceState)
         user = requireArguments().getParcelable("user")!!
         activity = requireActivity()
+        activity.onBackPressedDispatcher.addCallback(this,
+            object : OnBackPressedCallback(false){
+                override fun handleOnBackPressed() {
+                    Log.d(TAG,"BackPress")
+                }
+            })
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-
+        Log.d(TAG,"In settings fragment")
         username = activity.findViewById(R.id.settings_username)
         change_username = activity.findViewById(R.id.change_u)
         confirm_change_username = activity.findViewById(R.id.change_u_confirm)
@@ -75,16 +82,17 @@ class Settings : Fragment() {
         reset_data.setOnClickListener {
             reset_confirmation()
         }
-
-
     }
+
+
+
 
     /**
      * Updates the page with users data
      */
     private fun update_page(){
+        Log.d(TAG,"User ${user.username} ${user.email}")
         username.text = user.username
-
         change_username.hint = user.username
     }
 

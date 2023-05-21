@@ -43,6 +43,10 @@ class Hub : AppCompatActivity() {
         }
     }
 
+    override fun onBackPressed() {
+        //super.onBackPressed()
+        Log.d(TAG,"BackPress")
+    }
 
     override fun onDestroy() {
         super.onDestroy()

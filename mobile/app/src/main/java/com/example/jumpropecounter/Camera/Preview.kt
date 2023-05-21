@@ -246,6 +246,15 @@ class Preview: Fragment(R.layout.preview) {
         stopBackgroundThread()
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        recording = false
+        Log.d(TAG, "Ended recording with $N_SEQ frames")
+        closeCamera()
+        stopBackgroundThread()
+        activity.finish()
+    }
+
 
     /**
      * Starts capturing, having into account the chosen timer

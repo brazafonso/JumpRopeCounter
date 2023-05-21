@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Button
+import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.example.jumpropecounter.Camera.Preview
@@ -20,15 +21,16 @@ import com.example.jumpropecounter.Utils.ConcurrentFifo
 import com.example.jumpropecounter.Utils.Frame
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlin.coroutines.CoroutineContext
 
 const val EXTRA_USER = "user"
 const val JUMP_TYPE_ACTIVITY = "jump_rope"
 class MainActivity : AppCompatActivity() {
     private lateinit var photoSender: PhotoSender
-    private lateinit var login_btn: Button
-    private lateinit var logout_btn: Button
-
-    private lateinit var go_capture_btn: Button
+    private lateinit var icon: ImageButton
     private var user: User? = null
     private val TAG : String =  "MainActivity"
     var recording_folder:String = "/app_files/recording"
@@ -43,14 +45,9 @@ class MainActivity : AppCompatActivity() {
 
         // Check logged info (using firebase)
         val u = FirebaseAuth.getInstance().currentUser
-        if(u!=null){
-            Log.d(TAG,"Logged User")
-            get_user(u)
-            go_hub_activity()
-        }
 
         Log.d(TAG,"Loading View")
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_first_screen)
         Log.d(TAG,"Starting Program")
 
         // Create shared preferences
@@ -58,96 +55,29 @@ class MainActivity : AppCompatActivity() {
         val editor = sharedPreferences.edit()
         editor.putString("app_path", application.dataDir.absolutePath)
         editor.putInt("framerate",frameRate)
-        editor.commit()
+        editor.apply()
 
         // Get permissions
         get_permissions()
 
-        // If want to test the jump counter without the camera
-        //val framesFifo =  ConcurrentFifo<Frame>() // stack to store frames
-        //val counter = JumpCounter(framesFifo, null)
-        //counter.start()
 
-        go_capture_btn = findViewById(R.id.go_capture_btn)
-        login_btn = findViewById(R.id.login_btn)
-        logout_btn = findViewById(R.id.logout_btn)
-
-        Log.d(TAG,"User not logged")
-        enable_logout(false)
-        enable_login(true)
-
-        val admin_capture_btn = findViewById<Button>(R.id.admin_capture_btn)
-        admin_capture_btn.setOnClickListener {
-            Log.d(TAG,"Capture mode")
-            // Activity to show and capture video
-            val intent = Intent(this, JumpRope::class.java)
-            intent.putExtra("MODE",1)
-            startActivity(intent)
+        icon = findViewById(R.id.app_icon)
+        icon.setOnClickListener { _ ->
+            Log.d(TAG,"Start Button")
+            if(u!=null){
+                Log.d(TAG,"Logged User")
+                CoroutineScope(Dispatchers.IO).launch {
+                    get_user(u)
+                    go_hub_activity()
+                }
+            }else{
+                val myIntent =  Intent(this,LoginUserActivity::class.java)
+                startActivity(myIntent)
+            }
         }
 
-
-        go_capture_btn.setOnClickListener {
-            Log.d(TAG,"Capture mode")
-            getDir("files", MODE_PRIVATE)
-            // Activity to show and capture video
-            val previewFragment =
-                Preview.newInstance(frameRate,
-                getSharedPreferences("prefs",MODE_PRIVATE).getString("app_path",null) + recording_folder,
-                JUMP_TYPE_ACTIVITY,
-                    0)
-            addFragment(previewFragment)
-        }
-
-
-        login_btn.setOnClickListener { _ ->
-            Log.d(TAG,"Login Button")
-            val myIntent =  Intent(this,LoginUserActivity::class.java)
-            startActivity(myIntent)
-        }
-
-        logout_btn.setOnClickListener { _ ->
-            Log.d(TAG,"Logout button")
-            user?.sign_out()
-            user = null
-            enable_logout(false)
-            enable_login(true)
-        }
 
     }
-
-
-    override fun onResume() {
-        super.onResume()
-        Log.d(TAG,"Restarting")
-
-        val u = FirebaseAuth.getInstance().currentUser
-        if(u!=null){
-            Log.d(TAG,"Logged User")
-            get_user(u)
-            go_hub_activity()
-        }else{
-            Log.d(TAG,"User not logged")
-            enable_logout(false)
-            enable_login(true)
-        }
-    }
-
-    override fun onRestart() {
-        super.onRestart()
-        Log.d(TAG,"Restarting")
-
-        val u = FirebaseAuth.getInstance().currentUser
-        if(u!=null){
-            Log.d(TAG,"Logged User")
-            get_user(u)
-            go_hub_activity()
-        }else{
-            Log.d(TAG,"User not logged")
-            enable_logout(false)
-            enable_login(true)
-        }
-    }
-
 
 
 
@@ -193,7 +123,7 @@ class MainActivity : AppCompatActivity() {
     /**
      * Gets and updates firebase user
      */
-    fun get_user(u:FirebaseUser){
+    suspend fun get_user(u:FirebaseUser){
         Log.d(TAG, "User ${u.uid}")
         Log.d(TAG, "User ${u.displayName}")
         Log.d(TAG, "User ${u.email}")
@@ -203,26 +133,6 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-
-    /**
-     * Changes the status of the login button
-     */
-    fun enable_login(enable:Boolean){
-        if(enable)
-            login_btn.visibility = View.VISIBLE
-        else
-            login_btn.visibility = View.INVISIBLE
-    }
-
-    /**
-     * Changes the status of the logout button
-     */
-    fun enable_logout(enable:Boolean){
-        if(enable)
-            logout_btn.visibility = View.VISIBLE
-        else
-            logout_btn.visibility = View.INVISIBLE
-    }
 
 
     /**

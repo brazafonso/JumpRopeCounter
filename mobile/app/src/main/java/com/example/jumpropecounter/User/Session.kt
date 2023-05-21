@@ -100,7 +100,7 @@ class Session(val user_id: String, var type_activity:String?) {
         val db_users_reference = Firebase.database.reference.child("$DB_USER_PATH/$user_id")
         db_users_reference.get()
             .addOnSuccessListener {
-                Log.d(TAG,"Got user ${it.value} from $DB_USER_PATH/$user_id")
+                //Log.d(TAG,"Got user ${it.value} from $DB_USER_PATH/$user_id")
                 val user_map = it.value as Map<*, *>
                 height = user_map["height"].toString().toFloat()
                 weight = user_map["weight"].toString().toFloat()

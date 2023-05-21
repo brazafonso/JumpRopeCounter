@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import com.example.jumpropecounter.JUMP_TYPE_ACTIVITY
@@ -59,6 +60,12 @@ class Home:Fragment() {
         super.onCreate(savedInstanceState)
         user = requireArguments().getParcelable("user")!!
         activity = requireActivity()
+        activity.onBackPressedDispatcher.addCallback(this,
+            object : OnBackPressedCallback(false){
+                override fun handleOnBackPressed() {
+                    Log.d(TAG,"BackPress")
+                }
+            })
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -82,6 +89,8 @@ class Home:Fragment() {
         }
 
     }
+
+
 
 
     /**
