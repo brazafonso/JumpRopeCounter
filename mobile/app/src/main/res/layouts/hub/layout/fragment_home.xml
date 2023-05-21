@@ -177,7 +177,7 @@
                     android:layout_marginLeft="10dp"
                     android:layout_marginRight="10dp"
                     android:fontFamily="@font/open_sans_bold"
-                    android:text="Time spent per Day of the Week"
+                    android:text="Time spent per Day of the Week (seconds)"
                     android:textAlignment="center"
                     android:textColor="@color/text"
                     android:textSize="16sp" />

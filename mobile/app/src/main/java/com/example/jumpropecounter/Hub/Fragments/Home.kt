@@ -18,11 +18,15 @@ import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.formatter.IAxisValueFormatter
 import com.github.mikephil.charting.utils.ColorTemplate
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 
 class Home:Fragment() {
@@ -115,7 +119,7 @@ class Home:Fragment() {
 
                 // Create plot points
                 for (date in sorted_daily_reps_count) {
-                    list_jumps.add(Entry(x, date.value.toFloat()))
+                    list_jumps.add(Entry(x, date.value.toFloat(),date.key))
                     if (daily_reps_time.contains(date.key)) {
                         val values = daily_reps_time[date.key]
                         if (values != null) {
@@ -123,8 +127,9 @@ class Home:Fragment() {
                             val weight = values["weight"] as Float
                             val height = values["height"] as Float
                             val burned = calculate_burned_calories(duration, weight, height, MET)
-                            list_calories.add(Entry(x, burned))
-                            list_time.add(Entry(x, (duration / 60).toFloat()))
+                            list_calories.add(Entry(x, burned,date.key))
+                            //Log.d(TAG,"${date.key} $duration")
+                            list_time.add(Entry(x, duration.toFloat(),date.key))
                         }
                     } else {
                         list_calories.add(Entry(x, 0f))
@@ -132,26 +137,66 @@ class Home:Fragment() {
                     }
                     x += 1
                 }
-                val lineDataSet1 = LineDataSet(list_jumps.toList(), "list")
-                lineDataSet1.setColors(ColorTemplate.MATERIAL_COLORS, 255)
+                // Graph settings
+                val lineDataSet1 = LineDataSet(list_jumps.toList(),"")
+                lineDataSet1.setColors(Color.WHITE, Color.WHITE)
                 lineDataSet1.valueTextColor = Color.BLACK
+                lineDataSet1.setDrawCircles(false)
+                lineDataSet1.setDrawCircleHole(false)
+                lineDataSet1.valueTextSize = 10f
                 val lineData1 = LineData(lineDataSet1)
                 jumps_day_chart.data = lineData1
-                jumps_day_chart.description.text = "jumps chart"
+                jumps_day_chart.setVisibleXRangeMaximum(7F)
+                jumps_day_chart.description.text = ""
+                jumps_day_chart.legend.isEnabled = false
+                jumps_day_chart.xAxis.setValueFormatter { value, axis ->
+                    val entry = lineDataSet1.getEntryForIndex(value.toInt())
+                    val date = LocalDate.parse(entry.data.toString())
+                    date.dayOfWeek.toString()
+                }
+                jumps_day_chart.xAxis.textSize = 5f
+                jumps_day_chart.axisRight.isEnabled = false
+                jumps_day_chart.moveViewTo(x,0f,jumps_day_chart.axisLeft.axisDependency)
 
-                val lineDataSet2 = LineDataSet(list_calories.toList(), "list")
-                lineDataSet2.setColors(ColorTemplate.MATERIAL_COLORS, 255)
+                val lineDataSet2 = LineDataSet(list_calories.toList(),"")
+                lineDataSet2.setColors(Color.WHITE, Color.WHITE)
                 lineDataSet2.valueTextColor = Color.BLACK
+                lineDataSet2.setDrawCircles(false)
+                lineDataSet2.setDrawCircleHole(false)
+                lineDataSet2.valueTextSize = 10f
                 val lineData2 = LineData(lineDataSet2)
                 calories_day_chart.data = lineData2
-                calories_day_chart.description.text = "calories chart"
+                calories_day_chart.setVisibleXRangeMaximum(7F)
+                calories_day_chart.description.text = ""
+                calories_day_chart.legend.isEnabled = false
+                calories_day_chart.xAxis.setValueFormatter { value, axis ->
+                    val entry = lineDataSet1.getEntryForIndex(value.toInt())
+                    val date = LocalDate.parse(entry.data.toString())
+                    date.dayOfWeek.toString()
+                }
+                calories_day_chart.xAxis.textSize = 5f
+                calories_day_chart.axisRight.isEnabled = false
+                calories_day_chart.moveViewTo(x,0f,calories_day_chart.axisLeft.axisDependency)
 
-                val lineDataSet3 = LineDataSet(list_calories.toList(), "list")
-                lineDataSet3.setColors(ColorTemplate.MATERIAL_COLORS, 255)
+                val lineDataSet3 = LineDataSet(list_time.toList(),"")
+                lineDataSet3.setColors(Color.WHITE, Color.WHITE)
                 lineDataSet3.valueTextColor = Color.BLACK
+                lineDataSet3.setDrawCircles(false)
+                lineDataSet3.setDrawCircleHole(false)
+                lineDataSet3.valueTextSize = 10f
                 val lineData3 = LineData(lineDataSet3)
                 time_day_chart.data = lineData3
-                time_day_chart.description.text = "time chart"
+                time_day_chart.setVisibleXRangeMaximum(7F)
+                time_day_chart.description.text = ""
+                time_day_chart.legend.isEnabled = false
+                time_day_chart.xAxis.setValueFormatter { value, axis ->
+                    val entry = lineDataSet1.getEntryForIndex(value.toInt())
+                    val date = LocalDate.parse(entry.data.toString())
+                    date.dayOfWeek.toString()
+                }
+                time_day_chart.xAxis.textSize = 5f
+                time_day_chart.axisRight.isEnabled = false
+                time_day_chart.moveViewTo(x,0f,time_day_chart.axisLeft.axisDependency)
             }
 
             // Modify view

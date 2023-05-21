@@ -152,46 +152,50 @@ class User (user_id:String,username:String?,email:String?):Parcelable{
 
         if(sessions.isNotEmpty()) {
             val filteres_sessions = sessions.filter { s -> s.type_activity == type_activity }.sortedBy { s -> s.start }
-            val instant = Instant.ofEpochMilli(filteres_sessions[0].start).atZone(ZoneId.systemDefault())
-            val date = instant.toLocalDate()
+            var instant = Instant.ofEpochMilli(filteres_sessions[0].start).atZone(ZoneId.systemDefault())
+            var date = instant.toLocalDate()
             for (session in filteres_sessions) {
-                total_reps += session.total_reps
+                Log.d(TAG,"$date ${session.get_seconds()} seconds")
+                // Filtering only useful sessions
+                if(session.total_reps > 0 && session.get_seconds() > 0) {
+                    total_reps += session.total_reps
 
+                    instant = Instant.ofEpochMilli(session.start).atZone(ZoneId.systemDefault())
+                    date = instant.toLocalDate()
+                    val date_str = date.toString()
 
-                val instant = Instant.ofEpochMilli(session.start).atZone(ZoneId.systemDefault())
-                val date = instant.toLocalDate()
-                val date_str = date.toString()
-
-                // Update daily jumps and time
-                if(daily_reps_count.containsKey(date_str)){
-                    daily_reps_count[date_str] = daily_reps_count[date_str]!! + session.total_reps
-                    daily_reps_time[date_str]?.computeIfPresent("duration") { _, d -> d as Long + session.get_seconds() }
-                }else{
-                    daily_reps_count[date_str] = session.total_reps
-                    daily_reps_time[date_str] = mutableMapOf(
-                        "duration" to session.get_seconds(),
-                        "weight" to session.weight,
-                        "height" to session.height,
-                        "age" to session.age
-                    )
-                }
-                // Check daily streak
-                if (last_day == null) {
-                    streak = 1
-                } else {
-                    if (last_day.plusDays(1).dayOfYear == date.dayOfYear) {
-                        streak += 1
-                    } else if (last_day.dayOfYear != date.dayOfYear){
+                    // Update daily jumps and time
+                    if (daily_reps_count.containsKey(date_str)) {
+                        daily_reps_count[date_str] =
+                            daily_reps_count[date_str]!! + session.total_reps
+                        daily_reps_time[date_str]?.computeIfPresent("duration") { _, d -> d as Long + session.get_seconds() }
+                    } else {
+                        daily_reps_count[date_str] = session.total_reps
+                        daily_reps_time[date_str] = mutableMapOf(
+                            "duration" to session.get_seconds(),
+                            "weight" to session.weight,
+                            "height" to session.height,
+                            "age" to session.age
+                        )
+                    }
+                    // Check daily streak
+                    if (last_day == null) {
                         streak = 1
-                        //fill linkedHash with missing days
-                        var missing_day = last_day.plusDays(1)
-                        while (missing_day.dayOfYear != date.dayOfYear){
-                            daily_reps_count[missing_day.toString()] = 0
-                            missing_day = missing_day.plusDays(1)
+                    } else {
+                        if (last_day.plusDays(1).dayOfYear == date.dayOfYear) {
+                            streak += 1
+                        } else if (last_day.dayOfYear != date.dayOfYear) {
+                            streak = 1
+                            //fill linkedHash with missing days
+                            var missing_day = last_day.plusDays(1)
+                            while (missing_day.dayOfYear != date.dayOfYear) {
+                                daily_reps_count[missing_day.toString()] = 0
+                                missing_day = missing_day.plusDays(1)
+                            }
                         }
                     }
+                    last_day = date
                 }
-                last_day = date
             }
             // Last streak check with current day
             if (last_day != null) {
