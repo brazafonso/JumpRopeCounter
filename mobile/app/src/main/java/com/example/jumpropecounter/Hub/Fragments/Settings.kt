@@ -25,6 +25,12 @@ class Settings : Fragment() {
     private lateinit var username: TextView
     private lateinit var change_username: TextInputEditText
     private lateinit var confirm_change_username:ImageButton
+    private lateinit var change_age: TextInputEditText
+    private lateinit var confirm_change_age:ImageButton
+    private lateinit var change_weight: TextInputEditText
+    private lateinit var confirm_change_weight:ImageButton
+    private lateinit var change_height: TextInputEditText
+    private lateinit var confirm_change_height:ImageButton
     private lateinit var reset_data:Button
 
 
@@ -61,9 +67,21 @@ class Settings : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         Log.d(TAG,"In settings fragment")
+
         username = activity.findViewById(R.id.settings_username)
+
         change_username = activity.findViewById(R.id.change_u)
         confirm_change_username = activity.findViewById(R.id.change_u_confirm)
+
+        change_age = activity.findViewById(R.id.change_a)
+        confirm_change_age = activity.findViewById(R.id.change_a_confirm)
+
+        change_weight = activity.findViewById(R.id.change_w)
+        confirm_change_weight = activity.findViewById(R.id.change_w_confirm)
+
+        change_height = activity.findViewById(R.id.change_h)
+        confirm_change_height = activity.findViewById(R.id.change_h_confirm)
+
         reset_data = activity.findViewById(R.id.reset_data)
 
         update_page()
@@ -75,6 +93,43 @@ class Settings : Fragment() {
                 Toast.makeText(requireContext(),"Input a new username.",Toast.LENGTH_SHORT).show()
             }else{
                 user.change_username(new_username)
+                Toast.makeText(requireContext(),"Updated",Toast.LENGTH_SHORT).show()
+                update_page()
+            }
+        }
+
+        confirm_change_age.setOnClickListener {
+            val new_age = change_age.text.toString().toInt()
+            Log.d(TAG,"New age: $new_age")
+            if( new_age == user.age){
+                Toast.makeText(requireContext(),"Input a new age.",Toast.LENGTH_SHORT).show()
+            }else{
+                user.change_age(new_age)
+                Toast.makeText(requireContext(),"Updated",Toast.LENGTH_SHORT).show()
+                update_page()
+            }
+        }
+
+        confirm_change_weight.setOnClickListener {
+            val new_weight = change_weight.text.toString().toFloat()
+            Log.d(TAG,"New weight: $new_weight")
+            if( new_weight == user.weight){
+                Toast.makeText(requireContext(),"Input a new weight.",Toast.LENGTH_SHORT).show()
+            }else{
+                user.change_weight(new_weight)
+                Toast.makeText(requireContext(),"Updated",Toast.LENGTH_SHORT).show()
+                update_page()
+            }
+        }
+
+        confirm_change_height.setOnClickListener {
+            val new_height = change_height.text.toString().toFloat()
+            Log.d(TAG,"New height: $new_height")
+            if( new_height == user.height){
+                Toast.makeText(requireContext(),"Input a new height.",Toast.LENGTH_SHORT).show()
+            }else{
+                user.change_height(new_height)
+                Toast.makeText(requireContext(),"Updated",Toast.LENGTH_SHORT).show()
                 update_page()
             }
         }
@@ -94,6 +149,9 @@ class Settings : Fragment() {
         Log.d(TAG,"User ${user.username} ${user.email}")
         username.text = user.username
         change_username.hint = user.username
+        change_age.hint = user.age.toString()
+        change_height.hint = user.height.toString()
+        change_weight.hint = user.weight.toString()
     }
 
 

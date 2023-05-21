@@ -50,6 +50,7 @@
 
     <com.google.android.material.textfield.TextInputEditText
         android:id="@+id/change_a"
+        android:inputType="number"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingVertical="10dp"
@@ -62,7 +63,7 @@
         android:layout_centerHorizontal="true"/>
 
     <ImageButton
-        android:id="@+id/change_a_confirm"
+        android:id="@+id/change_w_confirm"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="320dp"
@@ -74,6 +75,7 @@
 
     <com.google.android.material.textfield.TextInputEditText
         android:id="@+id/change_w"
+        android:inputType="numberDecimal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="10dp"
@@ -85,7 +87,7 @@
         android:layout_centerHorizontal="true"/>
 
     <ImageButton
-        android:id="@+id/change_w_confirm"
+        android:id="@+id/change_a_confirm"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="320dp"
@@ -97,6 +99,7 @@
 
     <com.google.android.material.textfield.TextInputEditText
         android:id="@+id/change_h"
+        android:inputType="numberDecimal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="10dp"

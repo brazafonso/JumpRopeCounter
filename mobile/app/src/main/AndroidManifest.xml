@@ -41,7 +41,7 @@
             android:exported="false"
             android:screenOrientation="portrait"/>
         <activity
-            android:name=".Camera.teste"
+            android:name=".User.activity.Create_User"
             android:exported="false"
             android:screenOrientation="portrait"/>
 

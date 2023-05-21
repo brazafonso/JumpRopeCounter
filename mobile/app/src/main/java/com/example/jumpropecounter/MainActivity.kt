@@ -16,6 +16,7 @@ import com.example.jumpropecounter.Exercise.JumpRope
 import com.example.jumpropecounter.Hub.Hub
 import com.example.jumpropecounter.JumpCounter.JumpCounter
 import com.example.jumpropecounter.User.User
+import com.example.jumpropecounter.User.activity.Create_User
 import com.example.jumpropecounter.User.activity.LoginUserActivity
 import com.example.jumpropecounter.Utils.ConcurrentFifo
 import com.example.jumpropecounter.Utils.Frame
@@ -29,11 +30,10 @@ import kotlin.coroutines.CoroutineContext
 const val EXTRA_USER = "user"
 const val JUMP_TYPE_ACTIVITY = "jump_rope"
 class MainActivity : AppCompatActivity() {
-    private lateinit var photoSender: PhotoSender
     private lateinit var icon: ImageButton
     private var user: User? = null
     private val TAG : String =  "MainActivity"
-    var recording_folder:String = "/app_files/recording"
+    private var u: FirebaseUser? = null
     var frameRate = 10
 
 
@@ -44,7 +44,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         // Check logged info (using firebase)
-        val u = FirebaseAuth.getInstance().currentUser
+        u = FirebaseAuth.getInstance().currentUser
 
         Log.d(TAG,"Loading View")
         setContentView(R.layout.activity_first_screen)
@@ -60,15 +60,18 @@ class MainActivity : AppCompatActivity() {
         // Get permissions
         get_permissions()
 
-
         icon = findViewById(R.id.app_icon)
         icon.setOnClickListener { _ ->
             Log.d(TAG,"Start Button")
             if(u!=null){
                 Log.d(TAG,"Logged User")
                 CoroutineScope(Dispatchers.IO).launch {
-                    get_user(u)
-                    go_hub_activity()
+                    val exists = get_user(u!!)
+                    if(!exists){
+                        go_create_user_activity()
+                    }else {
+                        go_hub_activity()
+                    }
                 }
             }else{
                 val myIntent =  Intent(this,LoginUserActivity::class.java)
@@ -79,6 +82,13 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+
+    override fun onRestart() {
+        super.onRestart()
+        Log.d(TAG,"Restarting")
+
+        u = FirebaseAuth.getInstance().currentUser
+    }
 
 
 
@@ -123,17 +133,27 @@ class MainActivity : AppCompatActivity() {
     /**
      * Gets and updates firebase user
      */
-    suspend fun get_user(u:FirebaseUser){
+    suspend fun get_user(u:FirebaseUser):Boolean{
         Log.d(TAG, "User ${u.uid}")
         Log.d(TAG, "User ${u.displayName}")
         Log.d(TAG, "User ${u.email}")
         user = User(u.uid,u.displayName,u.email)
+        val exists = user!!.exists_user()
         user!!.get_user_data()
         Log.d(TAG, "User ${user!!.username}")
+        return exists
     }
 
 
 
+    /**
+     * Goes to create user activity
+     */
+    fun go_create_user_activity(){
+        val intent =  Intent(this, Create_User::class.java)
+        intent.putExtra(EXTRA_USER,user)
+        startActivity(intent)
+    }
 
     /**
      * Goes to home activity

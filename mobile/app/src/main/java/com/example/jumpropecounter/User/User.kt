@@ -33,10 +33,36 @@ class User (user_id:String,username:String?,email:String?):Parcelable{
     /**
      * Changes user username
      */
-    fun change_username(new_usernam:String){
-        username = new_usernam
+    fun change_username(new_username:String){
+        username = new_username
         update_user_data()
     }
+
+    /**
+     * Changes user age
+     */
+    fun change_age(new_age:Int){
+        age = new_age
+        update_user_data()
+    }
+
+    /**
+     * Changes user height
+     */
+    fun change_height(new_height:Float){
+        height = new_height
+        update_user_data()
+    }
+
+    /**
+     * Changes user weight
+     */
+    fun change_weight(new_weight:Float){
+        weight = new_weight
+        update_user_data()
+    }
+
+
 
     /**
      * Checks if user is signed in
@@ -218,6 +244,22 @@ class User (user_id:String,username:String?,email:String?):Parcelable{
             }
         }else{
             Log.d(TAG,"Error getting user")
+        }
+    }
+
+    /**
+     * Checks if user already exists
+     */
+    suspend fun exists_user():Boolean{
+        val db_users_reference = Firebase.database.reference.child("$DB_USER_PATH/$user_id")
+        val result = db_users_reference.get().await()
+        return if(result.exists()){
+            Log.d(TAG,"Got user data")
+            // user exists
+            result.value != null
+        }else{
+            Log.d(TAG,"Error getting user")
+            false
         }
     }
 
