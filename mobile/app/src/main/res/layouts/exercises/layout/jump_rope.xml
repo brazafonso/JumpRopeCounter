@@ -39,8 +39,8 @@
                 android:id="@+id/TextViewJumpRopeCounterDesc"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Number of Jumps:"
                 android:fontFamily="@font/open_sans_bold"
+                android:text="Number of Jumps:"
                 android:textColor="@color/text"
                 android:textSize="32sp" />
 
@@ -98,5 +98,7 @@
         android:layout_marginHorizontal="20dp"
         android:layout_marginBottom="10dp">
     </FrameLayout>
+
+
 
 </RelativeLayout>

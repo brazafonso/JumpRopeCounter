@@ -1,13 +1,19 @@
 package com.example.jumpropecounter.User
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.os.Parcel
 import android.os.Parcelable
 import android.util.Log
+import com.example.jumpropecounter.Camera.ImageUtils
+import com.example.jumpropecounter.Utils.General
 import com.firebase.ui.auth.AuthUI
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.time.Instant
 import java.time.LocalDate
@@ -31,7 +37,7 @@ class User (user_id:String,username:String?,email:String?):Parcelable{
     var total_jumps = 0
     var permission_level = 0
     var created = System.currentTimeMillis()
-
+    var profile_pic: Bitmap? = null
 
 
     /**
@@ -102,6 +108,17 @@ class User (user_id:String,username:String?,email:String?):Parcelable{
     fun add_session(session: Session){
         val db_session_reference = Firebase.database.reference.child("$DB_SESSION_PATH/$user_id/${session.start}")
         db_session_reference.setValue(session)
+    }
+
+    /**
+     * Tries to get profile pic
+     */
+    fun get_profile_pic(){
+        CoroutineScope(Dispatchers.IO).launch {
+            if (FirebaseAuth.getInstance().currentUser?.photoUrl != null)
+                profile_pic =
+                    General.getImageBitmap(FirebaseAuth.getInstance().currentUser?.photoUrl.toString())
+        }
     }
 
     /**

@@ -103,6 +103,8 @@ class JumpCounter (val concurrentFIFO: ConcurrentFifo<Frame>,session: Session?) 
         // Count previous jump
         var previousJumpCount = 0
 
+        var previousNoJumpCount = 0
+
         while (true)
         {
             if (!_concurrentFIFO.isEmpty()) {
@@ -123,8 +125,9 @@ class JumpCounter (val concurrentFIFO: ConcurrentFifo<Frame>,session: Session?) 
                     if(jumping)
                     {
                         previousJumpCount++
-                        if (jumpList.isEmpty() or (previousJumpCount == 1 && jumpList.isNotEmpty()))
+                        if (previousJumpCount == 2 && jumpList.isNotEmpty() && previousNoJumpCount > 2)
                         {
+                            previousNoJumpCount = 0
                             this._jumpCount++
                             Log.d(TAG, "Jump count: ${this._jumpCount}")
                             if (session!=null)
@@ -133,6 +136,7 @@ class JumpCounter (val concurrentFIFO: ConcurrentFifo<Frame>,session: Session?) 
                     }
                     else
                     {
+                        previousNoJumpCount++
                         previousJumpCount = 0
                     }
 

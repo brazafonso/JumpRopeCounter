@@ -133,7 +133,7 @@
                     android:layout_marginLeft="10dp"
                     android:layout_marginRight="10dp"
                     android:fontFamily="@font/open_sans_bold"
-                    android:text="Number of Jumps per Day of the Week"
+                    android:text="Number of Jumps per Day"
                     android:textAlignment="center"
                     android:textColor="@color/text"
                     android:textSize="16sp" />
@@ -156,7 +156,7 @@
                     android:layout_gravity="center"
                     android:layout_marginTop="10dp"
                     android:layout_marginBottom="10dp"
-                    android:background="@android:color/white" />
+                    android:background="@android:color/background_dark" />
 
             </LinearLayout>
 
@@ -200,7 +200,7 @@
                     android:layout_gravity="center"
                     android:layout_marginTop="10dp"
                     android:layout_marginBottom="10dp"
-                    android:background="@android:color/white" />
+                    android:background="@android:color/background_dark" />
 
             </LinearLayout>
 
@@ -244,7 +244,7 @@
                     android:layout_gravity="center"
                     android:layout_marginTop="10dp"
                     android:layout_marginBottom="10dp"
-                    android:background="@android:color/white" />
+                    android:background="@android:color/background_dark" />
 
             </LinearLayout>
 

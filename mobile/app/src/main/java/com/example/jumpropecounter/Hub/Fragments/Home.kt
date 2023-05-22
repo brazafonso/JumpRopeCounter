@@ -1,5 +1,6 @@
 package com.example.jumpropecounter.Hub.Fragments
 
+import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
@@ -7,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
@@ -104,7 +106,7 @@ class Home:Fragment() {
     /**
      * Func that gathers information about the users sessions and updates view accordingly
      */
-    fun update_stats(){
+    private fun update_stats(){
         CoroutineScope(Dispatchers.IO).launch {
             val sessions = user.get_sessions()
             val stats = user.get_stats(sessions, JUMP_TYPE_ACTIVITY)
@@ -144,7 +146,7 @@ class Home:Fragment() {
                 // Graph settings
                 val lineDataSet1 = LineDataSet(list_jumps.toList(),"")
                 lineDataSet1.setColors(Color.WHITE, Color.WHITE)
-                lineDataSet1.valueTextColor = Color.BLACK
+                lineDataSet1.valueTextColor = Color.WHITE
                 lineDataSet1.setDrawCircles(false)
                 lineDataSet1.setDrawCircleHole(false)
                 lineDataSet1.valueTextSize = 10f
@@ -156,15 +158,23 @@ class Home:Fragment() {
                 jumps_day_chart.xAxis.setValueFormatter { value, axis ->
                     val entry = lineDataSet1.getEntryForIndex(value.toInt())
                     val date = LocalDate.parse(entry.data.toString())
-                    date.dayOfWeek.toString()
+                    if(value !=  lineDataSet1.xMax)
+                        date.dayOfWeek.toString()
+                    else
+                        date.toString()
                 }
                 jumps_day_chart.xAxis.textSize = 5f
                 jumps_day_chart.axisRight.isEnabled = false
                 jumps_day_chart.moveViewTo(x,0f,jumps_day_chart.axisLeft.axisDependency)
+                jumps_day_chart.setDrawGridBackground(true)
+                jumps_day_chart.setGridBackgroundColor(Color.BLACK)
+                jumps_day_chart.setBackgroundColor(Color.parseColor("#1f1f1f"))
+                jumps_day_chart.axisLeft.textColor = Color.WHITE
+                jumps_day_chart.xAxis.textColor = Color.WHITE
 
                 val lineDataSet2 = LineDataSet(list_calories.toList(),"")
                 lineDataSet2.setColors(Color.WHITE, Color.WHITE)
-                lineDataSet2.valueTextColor = Color.BLACK
+                lineDataSet2.valueTextColor = Color.WHITE
                 lineDataSet2.setDrawCircles(false)
                 lineDataSet2.setDrawCircleHole(false)
                 lineDataSet2.valueTextSize = 10f
@@ -176,15 +186,23 @@ class Home:Fragment() {
                 calories_day_chart.xAxis.setValueFormatter { value, axis ->
                     val entry = lineDataSet1.getEntryForIndex(value.toInt())
                     val date = LocalDate.parse(entry.data.toString())
-                    date.dayOfWeek.toString()
+                    if(value !=  lineDataSet2.xMax)
+                        date.dayOfWeek.toString()
+                    else
+                        date.toString()
                 }
                 calories_day_chart.xAxis.textSize = 5f
                 calories_day_chart.axisRight.isEnabled = false
                 calories_day_chart.moveViewTo(x,0f,calories_day_chart.axisLeft.axisDependency)
+                calories_day_chart.setDrawGridBackground(true)
+                calories_day_chart.setGridBackgroundColor(Color.BLACK)
+                calories_day_chart.setBackgroundColor(Color.parseColor("#1f1f1f"))
+                calories_day_chart.axisLeft.textColor = Color.WHITE
+                calories_day_chart.xAxis.textColor = Color.WHITE
 
                 val lineDataSet3 = LineDataSet(list_time.toList(),"")
                 lineDataSet3.setColors(Color.WHITE, Color.WHITE)
-                lineDataSet3.valueTextColor = Color.BLACK
+                lineDataSet3.valueTextColor = Color.WHITE
                 lineDataSet3.setDrawCircles(false)
                 lineDataSet3.setDrawCircleHole(false)
                 lineDataSet3.valueTextSize = 10f
@@ -196,11 +214,19 @@ class Home:Fragment() {
                 time_day_chart.xAxis.setValueFormatter { value, axis ->
                     val entry = lineDataSet1.getEntryForIndex(value.toInt())
                     val date = LocalDate.parse(entry.data.toString())
-                    date.dayOfWeek.toString()
+                    if(value !=  lineDataSet3.xMax)
+                        date.dayOfWeek.toString()
+                    else
+                        date.toString()
                 }
                 time_day_chart.xAxis.textSize = 5f
                 time_day_chart.axisRight.isEnabled = false
                 time_day_chart.moveViewTo(x,0f,time_day_chart.axisLeft.axisDependency)
+                time_day_chart.setDrawGridBackground(true)
+                time_day_chart.setGridBackgroundColor(Color.BLACK)
+                time_day_chart.setBackgroundColor(Color.parseColor("#1f1f1f"))
+                time_day_chart.axisLeft.textColor = Color.WHITE
+                time_day_chart.xAxis.textColor = Color.WHITE
             }
 
             // Modify view
@@ -233,5 +259,6 @@ class Home:Fragment() {
         Log.d(TAG,"Burned $burned in $seconds seconds")
         return burned.toFloat()
     }
+
 
 }

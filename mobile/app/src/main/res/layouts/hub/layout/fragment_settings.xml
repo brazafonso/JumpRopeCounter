@@ -25,15 +25,28 @@
         android:textSize="28sp"
         />
 
-    <com.google.android.material.textfield.TextInputEditText
-        android:id="@+id/change_u"
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="Name: "
+        android:layout_marginTop="252dp"
+        android:layout_marginStart="10dp"
+        android:fontFamily="@font/open_sans_bold"
+        android:textColor="@color/text"
+        android:textSize="28sp"
+        />
+
+    <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/change_u"
+        android:layout_width="170dp"
+        android:layout_height="50dp"
+        android:textAlignment="center"
         android:padding="10dp"
         android:background="@color/primary_button"
         android:layout_marginTop="250dp"
         android:textColorHint="@color/text"
         android:fontFamily="@font/open_sans_bold"
+        android:textSize="20sp"
         android:hint="Change Username"
         android:layout_centerHorizontal="true"/>
 
@@ -48,11 +61,24 @@
         android:paddingHorizontal="28dp"
         android:src="@drawable/check_icon" />
 
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Age: "
+        android:layout_marginTop="325dp"
+        android:layout_marginStart="10dp"
+        android:fontFamily="@font/open_sans_bold"
+        android:textColor="@color/text"
+        android:textSize="28sp"
+        />
+
     <com.google.android.material.textfield.TextInputEditText
         android:id="@+id/change_a"
         android:inputType="number"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="170dp"
+        android:layout_height="50dp"
+        android:textAlignment="center"
         android:paddingVertical="10dp"
         android:paddingHorizontal="30dp"
         android:background="@color/primary_button"
@@ -73,11 +99,23 @@
         android:paddingHorizontal="28dp"
         android:src="@drawable/check_icon" />
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Weight: "
+        android:layout_marginTop="405dp"
+        android:layout_marginStart="10dp"
+        android:fontFamily="@font/open_sans_bold"
+        android:textColor="@color/text"
+        android:textSize="26sp"
+        />
+
     <com.google.android.material.textfield.TextInputEditText
         android:id="@+id/change_w"
         android:inputType="numberDecimal"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="170dp"
+        android:layout_height="50dp"
+        android:textAlignment="center"
         android:padding="10dp"
         android:background="@color/primary_button"
         android:layout_marginTop="400dp"
@@ -97,11 +135,24 @@
         android:paddingHorizontal="28dp"
         android:src="@drawable/check_icon" />
 
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Height: "
+        android:layout_marginTop="475dp"
+        android:layout_marginStart="10dp"
+        android:fontFamily="@font/open_sans_bold"
+        android:textColor="@color/text"
+        android:textSize="26sp"
+        />
+
     <com.google.android.material.textfield.TextInputEditText
         android:id="@+id/change_h"
         android:inputType="numberDecimal"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="170dp"
+        android:layout_height="50dp"
+        android:textAlignment="center"
         android:padding="10dp"
         android:background="@color/primary_button"
         android:layout_marginTop="475dp"

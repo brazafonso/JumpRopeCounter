@@ -64,6 +64,7 @@ class MainActivity : AppCompatActivity() {
         icon.setOnClickListener { _ ->
             Log.d(TAG,"Start Button")
             if(u!=null){
+                //u.photoUrl
                 Log.d(TAG,"Logged User")
                 CoroutineScope(Dispatchers.IO).launch {
                     Log.d(TAG,"Geting user information")

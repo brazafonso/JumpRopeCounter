@@ -1,21 +1,30 @@
 package com.example.jumpropecounter.Hub.Fragments
 
+import android.R.attr.bitmap
 import android.app.AlertDialog
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.os.AsyncTask
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.ImageButton
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import com.example.jumpropecounter.R
 import com.example.jumpropecounter.User.User
+import com.example.jumpropecounter.Utils.General
 import com.google.android.material.textfield.TextInputEditText
+import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.io.IOException
+import java.io.InputStream
+import java.net.URL
 
 
 class Settings : Fragment() {
@@ -23,6 +32,7 @@ class Settings : Fragment() {
     private lateinit var activity: FragmentActivity
     private lateinit var user: User
     private lateinit var username: TextView
+    private lateinit var profile_pic: ImageView
     private lateinit var change_username: TextInputEditText
     private lateinit var confirm_change_username:ImageButton
     private lateinit var change_age: TextInputEditText
@@ -69,6 +79,7 @@ class Settings : Fragment() {
         Log.d(TAG,"In settings fragment")
 
         username = activity.findViewById(R.id.settings_username)
+        profile_pic = activity.findViewById(R.id.profileimage)
 
         change_username = activity.findViewById(R.id.change_u)
         confirm_change_username = activity.findViewById(R.id.change_u_confirm)
