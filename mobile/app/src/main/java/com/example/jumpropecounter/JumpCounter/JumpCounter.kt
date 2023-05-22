@@ -125,7 +125,7 @@ class JumpCounter (val concurrentFIFO: ConcurrentFifo<Frame>,session: Session?) 
                     if(jumping)
                     {
                         previousJumpCount++
-                        if (previousJumpCount == 2 && jumpList.isNotEmpty() && previousNoJumpCount > 2)
+                        if (previousJumpCount == 2 && jumpList.isNotEmpty() && previousNoJumpCount >= 2)
                         {
                             previousNoJumpCount = 0
                             this._jumpCount++
