@@ -67,7 +67,7 @@ class Hub : AppCompatActivity() {
                 tag = "home"
             }
             R.id.exercise -> {
-                selectedFragment = Exercise()
+                selectedFragment = Exercise.newInstance(user)
                 tag = "exercise"
             }
             R.id.settings -> {

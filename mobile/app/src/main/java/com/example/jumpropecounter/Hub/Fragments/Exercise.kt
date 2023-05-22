@@ -11,28 +11,40 @@ import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import com.example.jumpropecounter.Exercise.JumpRope
 import com.example.jumpropecounter.R
+import com.example.jumpropecounter.User.User
 
 
 class Exercise : Fragment() {
-    val TAG = "Exercise Fragment"
+    private val TAG = "Exercise Fragment"
+    private lateinit var admin_btn:Button
+    private lateinit var jumpRopeButton:Button
+    private lateinit var user:User
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        requireActivity().onBackPressedDispatcher.addCallback(this,
-            object : OnBackPressedCallback(false){
-                override fun handleOnBackPressed() {
-                    Log.d(TAG,"BackPress")
-                }
-            })
+        user = requireArguments().getParcelable("user")!!
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        val jumpRopeButton = requireActivity().findViewById<Button>(R.id.jumping_rope)
+        jumpRopeButton = requireActivity().findViewById<Button>(R.id.jumping_rope)
+        admin_btn = requireActivity().findViewById<Button>(R.id.admin_capture_btn)
+
+        // Enable admin button for admins
+        if(user.permission_level == 1)
+            admin_btn.visibility = View.VISIBLE
+
         jumpRopeButton.setOnClickListener {
             Log.d(TAG,"Going to Jump Rope activity")
             val intent = Intent(activity,JumpRope::class.java)
             intent.putExtra("MODE",0)
+            startActivity(intent)
+        }
+
+        admin_btn.setOnClickListener {
+            Log.d(TAG,"Going to Jump Rope activity")
+            val intent = Intent(activity,JumpRope::class.java)
+            intent.putExtra("MODE",1)
             startActivity(intent)
         }
     }
@@ -48,8 +60,12 @@ class Exercise : Fragment() {
 
 
     companion object {
-
-        @JvmStatic
-        fun newInstance() = Exercise()
+        fun newInstance(u: User): Exercise {
+            val fragment = Exercise()
+            val args = Bundle()
+            args.putParcelable("user", u)
+            fragment.arguments = args
+            return fragment
+        }
     }
 }
